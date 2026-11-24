@@ -1,0 +1,157 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GameController;
+use App\Http\Controllers\RawgController;
+
+
+// =========================================
+// HALAMAN UTAMA
+// =========================================
+
+Route::get('/', function () {
+    return redirect('/login');
+});
+
+
+// =========================================
+// GUEST: PENGGUNA BELUM LOGIN
+// =========================================
+
+Route::middleware('guest')->group(function () {
+
+    // Login
+    Route::get('/login', [AuthController::class, 'showLogin'])
+        ->name('login');
+
+    Route::post('/login', [AuthController::class, 'login']);
+
+    // Register
+    Route::get('/register', [AuthController::class, 'showRegister'])
+        ->name('register');
+
+    Route::post('/register', [AuthController::class, 'register']);
+
+});
+
+
+// =========================================
+// AUTHENTICATED: SEMUA PENGGUNA LOGIN
+// =========================================
+
+Route::middleware('auth')->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard');
+
+
+    // Logout
+    Route::post('/logout', [AuthController::class, 'logout'])
+        ->name('logout');
+
+
+    // =====================================
+    // KATALOG GAME
+    // =====================================
+
+    // Menampilkan katalog game
+    Route::get('/games', [GameController::class, 'index'])
+        ->name('games.index');
+
+
+    // =====================================
+    // KELOLA KATALOG: ADMIN SAJA
+    // =====================================
+
+    Route::middleware('admin')->group(function () {
+
+        // Menampilkan form tambah game
+        Route::get('/games/create', [GameController::class, 'create'])
+            ->name('games.create');
+
+        // Menyimpan game baru
+        Route::post('/games', [GameController::class, 'store'])
+            ->name('games.store');
+
+        // Menampilkan form edit game
+        Route::get('/games/{id}/edit', [GameController::class, 'edit'])
+            ->whereNumber('id')
+            ->name('games.edit');
+
+        // Memperbarui data game
+        Route::put('/games/{id}', [GameController::class, 'update'])
+            ->whereNumber('id')
+            ->name('games.update');
+
+        // Menghapus game
+        Route::delete('/games/{id}', [GameController::class, 'destroy'])
+            ->whereNumber('id')
+            ->name('games.destroy');
+
+    });
+
+
+    // =====================================
+    // DETAIL GAME: USER DAN ADMIN
+    // =====================================
+
+    // Letakkan setelah route /games/create
+    Route::get('/games/{id}', [GameController::class, 'show'])
+        ->whereNumber('id')
+        ->name('games.show');
+
+
+    // =====================================
+    // PERSONAL LIBRARY: USER DAN ADMIN
+    // =====================================
+
+    // Menambahkan game ke Personal Library
+    Route::post('/games/{id}/library', [GameController::class, 'addToLibrary'])
+        ->whereNumber('id')
+        ->name('games.library.add');
+
+    // Menampilkan Personal Library
+    Route::get('/my-library', [GameController::class, 'myLibrary'])
+        ->name('games.library');
+
+    // Menampilkan form edit Personal Library
+    Route::get('/my-library/{id}/edit', [GameController::class, 'editLibrary'])
+        ->whereNumber('id')
+        ->name('games.library.edit');
+
+    // Memperbarui Personal Library
+    Route::put('/my-library/{id}', [GameController::class, 'updateLibrary'])
+        ->whereNumber('id')
+        ->name('games.library.update');
+
+    // Menghapus game dari Personal Library
+    Route::delete('/my-library/{id}', [GameController::class, 'removeFromLibrary'])
+        ->whereNumber('id')
+        ->name('games.library.remove');
+
+    Route::post('/rawg-game/{id}/add',
+    [RawgController::class, 'addToMyGames']
+    )->name('rawg.add');
+
+});
+
+Route::get('/test-rawg', [RawgController::class, 'search']);
+
+Route::get('/rawg-catalog', [RawgController::class, 'catalog']);
+
+Route::get('/rawg-game/{id}', [RawgController::class, 'detail'])
+    ->name('rawg.detail');
+
+Route::post('/rawg-game/{id}/add', [
+    RawgController::class,
+    'addToMyGames'
+])
+->middleware('auth')
+->name('rawg.add');
+
+Route::post('/rawg-game/{id}/add', [RawgController::class, 'addToMyGames'])
+    ->middleware('auth')
+    ->name('rawg.add');

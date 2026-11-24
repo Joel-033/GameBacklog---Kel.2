@@ -1,0 +1,4207 @@
+@import 'tailwindcss';
+@import '@fontsource/dseg7-classic';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* ==================================================
+   GLOBAL
+================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    color: #f5f5f5;
+    font-family: var(--font-sans);
+}
+
+.page-container {
+    width: min(1200px, 92%);
+    margin: auto;
+}
+
+/* ==================================================
+   LEGACY CATALOG COMPONENTS
+   Dipertahankan agar halaman katalog lama tidak rusak.
+================================================== */
+
+.catalog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 45px 0 35px;
+    margin-bottom: 35px;
+    border-bottom: 1px solid #292a33;
+}
+
+.brand-label {
+    color: #8b7cff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 3px;
+}
+
+.catalog-header h1 {
+    margin: 8px 0;
+    font-size: 36px;
+}
+
+.header-description,
+.total-games span,
+.section-heading span {
+    color: #92939f;
+}
+
+.header-description {
+    margin: 0;
+}
+
+.total-games {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px 25px;
+    background: #1c1d26;
+    border: 1px solid #30313d;
+    border-radius: 12px;
+}
+
+.total-games span,
+.section-heading span {
+    font-size: 12px;
+}
+
+.total-games strong {
+    color: #9a8cff;
+    font-size: 28px;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.section-heading h2 {
+    margin: 0;
+    font-size: 23px;
+}
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.game-card {
+    overflow: hidden;
+    background: #1b1c25;
+    border: 1px solid #2c2d38;
+    border-radius: 12px;
+    transition: transform .2s ease, border-color .2s ease;
+}
+
+.game-card:hover {
+    transform: translateY(-5px);
+    border-color: #8877ff;
+}
+
+.cover-container {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: #262733;
+}
+
+.game-cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .3s ease;
+}
+
+.game-card:hover .game-cover {
+    transform: scale(1.04);
+}
+
+.no-cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #92939f;
+    font-size: 13px;
+}
+
+.game-info {
+    padding: 16px;
+}
+
+.game-info h3 {
+    margin: 0 0 10px;
+    font-size: 17px;
+    line-height: 1.4;
+}
+
+.game-genre {
+    display: inline-block;
+    margin: 0 0 12px;
+    padding: 5px 10px;
+    color: #a99cff;
+    background: #302a50;
+    border-radius: 5px;
+    font-size: 11px;
+}
+
+.game-developer {
+    margin: 0 0 14px;
+    color: #a5a5b1;
+    font-size: 12px;
+}
+
+.platform-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.platform-badge {
+    padding: 5px 8px;
+    color: #d0d0dc;
+    background: #292a35;
+    border: 1px solid #3b3c48;
+    border-radius: 5px;
+    font-size: 10px;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    padding: 60px 20px;
+    color: #a5a5b1;
+    background: #1b1c25;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 40px 0;
+}
+
+.pagination-wrapper nav {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.pagination-wrapper nav div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pagination-wrapper nav a,
+.pagination-wrapper nav span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 8px 12px;
+    color: #dedee8;
+    background: #252630;
+    border: 1px solid #393a47;
+    border-radius: 7px;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.pagination-wrapper nav a:hover,
+.pagination-wrapper nav span[aria-current="page"] span {
+    color: white;
+    background: #6654d9;
+    border-color: #6654d9;
+}
+
+.pagination-wrapper nav svg {
+    width: 18px;
+    height: 18px;
+}
+
+.catalog-footer {
+    padding: 25px 0;
+    color: #777987;
+    border-top: 1px solid #292a33;
+    font-size: 12px;
+    text-align: center;
+}
+
+/* ==================================================
+   GAMEBACKLOG - NINTENDO WII SYSTEM MENU
+================================================== */
+
+body.wii-body {
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    padding: 0;
+    color: #666;
+    font-family: Arial, Helvetica, sans-serif;
+    background: radial-gradient(ellipse at 50% 25%, #fff 0%, #fafcfd 48%, #edf1f3 100%);
+    background-attachment: fixed;
+}
+
+.wii-screen {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 35px 20px 210px;
+}
+
+.wii-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.wii-brand {
+    color: #29a7d2;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 5.5px;
+    opacity: .85;
+    text-shadow: 0 1px 2px rgba(0, 130, 190, .12);
+}
+
+.wii-counter {
+    color: #8a9ba3;
+    font-size: 12px;
+    letter-spacing: .5px;
+}
+
+.wii-menu {
+    position: relative;
+}
+
+.channel-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 50px;
+}
+
+.channel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 150px;
+    overflow: hidden;
+    color: #666;
+    background: linear-gradient(145deg, #fff 0%, #f8fafb 55%, #e9eef1 100%);
+    border: 1px solid #cbd5da;
+    border-radius: 16px;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, .13),
+                inset 0 1px 0 #fff,
+                inset 0 -2px 3px rgba(0, 0, 0, .05);
+    text-decoration: none;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+
+.channel:not(.empty-slot):hover {
+    z-index: 5;
+    transform: translateY(-4px) scale(1.035);
+    border-color: #65cbed;
+    box-shadow: 0 0 0 2px rgba(76, 190, 235, .2),
+                0 5px 18px rgba(40, 160, 210, .25),
+                inset 0 1px 3px #fff;
+}
+
+.channel-preview {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 15px 15px 0 0;
+    background: #eee;
+}
+
+.channel-preview img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(1.05);
+    transition: transform .4s ease, filter .4s ease;
+}
+
+.channel:not(.empty-slot):hover .channel-preview img {
+    transform: scale(1.07);
+    filter: saturate(1.15);
+}
+
+.channel-gloss {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(125deg, rgba(255,255,255,.4) 0%,
+        rgba(255,255,255,.12) 25%, transparent 48%,
+        rgba(255,255,255,.08) 75%, transparent 100%);
+    background-size: 200% 200%;
+    pointer-events: none;
+    animation: wii-shine 8s ease-in-out infinite;
+}
+
+@keyframes wii-shine {
+    0%, 100% { background-position: 0 0; }
+    50% { background-position: 100% 100%; }
+}
+
+.empty-channel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #a99bc9;
+    background: repeating-linear-gradient(135deg, #f4f4f4 0 2px, #ededed 2px 4px);
+    box-shadow: inset 0 1px 5px rgba(0, 0, 0, .04),
+                inset 0 -2px 5px rgba(255, 255, 255, .8);
+    font-size: 30px;
+}
+
+.empty-slot {
+    cursor: default;
+    background: linear-gradient(145deg, #fff, #eee);
+}
+
+.empty-slot .empty-channel::after {
+    content: "🎮";
+    opacity: .65;
+    filter: grayscale(.25);
+}
+
+.empty-slot:hover {
+    border-color: #bdbdbd;
+}
+
+.channel-label {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    padding: 9px 6px;
+    overflow: hidden;
+    color: #fff;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,.12) 15%, rgba(0,0,0,.78) 100%);
+    border-radius: 0 0 15px 15px;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: .2px;
+    text-align: center;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 3px rgba(0,0,0,.75);
+    white-space: nowrap;
+}
+
+.page-arrows {
+    position: absolute;
+    top: 50%;
+    right: -42px;
+    left: -42px;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.page-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 38px;
+    height: 48px;
+    color: #269fca;
+    background: linear-gradient(145deg, #fff 0%, #f5fcff 50%, #dff4fc 100%);
+    border: 1px solid #c5e9f7;
+    border-radius: 50%;
+    box-shadow: 0 3px 7px rgba(0,0,0,.09), inset 0 2px 3px #fff;
+    font-size: 30px;
+    font-weight: 300;
+    text-decoration: none;
+    pointer-events: auto;
+    transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
+}
+
+.page-arrow:not(.disabled):hover {
+    color: #168fbd;
+    background: linear-gradient(145deg, #fff, #d9f4ff);
+    box-shadow: 0 0 12px rgba(50,180,225,.3), inset 0 2px 4px #fff;
+    transform: scale(1.12);
+}
+
+.page-arrow.disabled {
+    opacity: .25;
+}
+
+.page-arrow:focus-visible,
+.channel:focus-visible {
+    outline: 2px solid #36b8e8;
+    outline-offset: 3px;
+}
+
+/* ==================================================
+   BOTTOM DOCK & DIGITAL CLOCK
+================================================== */
+
+.wii-dock {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+    height: 190px;
+    min-height: 190px;
+    padding: 28px 5% 8px;
+    background: transparent;
+    border: 0;
+}
+
+.wii-dock::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 190' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.55' stop-color='%23effaff'/%3E%3Cstop offset='1' stop-color='%23dceef5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 0 C210 0 300 75 500 75 C700 75 790 0 1000 0 L1000 190 L0 190 Z' fill='url(%23g)'/%3E%3Cpath d='M0 0 C210 0 300 75 500 75 C700 75 790 0 1000 0' fill='none' stroke='%238bd9f2' stroke-width='3'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    filter: drop-shadow(0 -5px 8px rgba(0,0,0,.08));
+    content: "";
+    pointer-events: none;
+}
+
+.dock-left,
+.dock-right {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+}
+
+.dock-left { justify-content: flex-start; }
+.dock-right { justify-content: flex-end; }
+
+.wii-circle,
+.mail-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 54px;
+    height: 54px;
+    color: #83a9b8;
+    background: linear-gradient(145deg, #fff, #e1f5fc);
+    border: 2px solid #81d2ef;
+    border-radius: 50%;
+    box-shadow: 0 2px 7px rgba(0,0,0,.12),
+                inset 0 2px 4px #fff,
+                0 0 8px rgba(80,190,230,.12);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.wii-circle { font-size: 20px; }
+.mail-circle { font-size: 22px; }
+
+.wii-circle:hover,
+.mail-circle:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(60,185,230,.35), inset 0 2px 4px #fff;
+}
+
+.dock-center {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transform: translateY(20px);
+}
+
+.wii-time {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+    color: #858b8f;
+    font-family: 'DSEG7 Classic', sans-serif;
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 1px #fff;
+}
+
+.wii-time small {
+    margin-left: 3px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0;
+    vertical-align: middle;
+}
+
+.wii-date {
+    position: relative;
+    z-index: 2;
+    margin-top: 5px;
+    color: #75858e;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: .3px;
+}
+
+/* ==================================================
+   GAME OPENING OVERLAY
+================================================== */
+
+.wii-opening-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+    background: rgba(255,255,255,0);
+    opacity: 0;
+    transition: opacity .35s ease, background .5s ease, visibility .5s;
+}
+
+.wii-opening-overlay.active {
+    visibility: visible;
+    background: #f7f7f7;
+    opacity: 1;
+}
+
+.wii-opening-panel {
+    width: min(850px, 90vw);
+    min-height: 440px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #d7e5eb;
+    border-radius: 12px;
+    box-shadow: 0 8px 35px rgba(0,0,0,.15);
+    opacity: 0;
+    transform: scale(.65);
+    transition: transform .55s cubic-bezier(.2,.8,.2,1), opacity .4s ease;
+}
+
+.wii-opening-overlay.active .wii-opening-panel {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.wii-opening-header {
+    padding: 22px;
+    color: #269fc9;
+    border-bottom: 1px solid #e5e5e5;
+    font-size: 25px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.wii-opening-cover {
+    width: 210px;
+    height: 250px;
+    margin: 28px auto 15px;
+    background: linear-gradient(135deg, #eee, #ddd) center / cover no-repeat;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.2);
+}
+
+.wii-opening-title {
+    margin: 15px;
+    color: #555;
+    font-size: 23px;
+    text-align: center;
+}
+
+.wii-opening-actions {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    padding: 20px;
+}
+
+.wii-action-button {
+    min-width: 125px;
+    padding: 12px 25px;
+    color: #269fc9;
+    background: linear-gradient(to bottom, #fff, #dff4fc);
+    border: 1px solid #a9dcef;
+    border-radius: 30px;
+    box-shadow: 0 3px 7px rgba(0,0,0,.1);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.wii-action-button:hover {
+    background: linear-gradient(to bottom, #e8faff, #bceaff);
+    box-shadow: 0 0 12px rgba(50,180,230,.4);
+    transform: translateY(-2px);
+}
+
+.wii-action-button.primary {
+    color: #fff;
+    background: linear-gradient(to bottom, #51c5ec, #159bd0);
+}
+
+/* ==================================================
+   RESPONSIVE
+================================================== */
+
+@media (max-width: 900px) {
+    .game-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 750px) {
+    .channel-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .channel { height: 120px; }
+}
+
+@media (max-width: 600px) {
+    .game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .catalog-header { align-items: flex-start; }
+    .catalog-header h1 { font-size: 26px; }
+    .total-games { padding: 10px 14px; }
+    .game-info { padding: 12px; }
+    .game-info h3 { font-size: 14px; }
+    .section-heading { align-items: flex-start; gap: 10px; }
+
+    .wii-opening-panel { min-height: auto; }
+    .wii-opening-cover { width: 150px; height: 190px; }
+
+    .wii-dock {
+        height: 145px;
+        min-height: 145px;
+        padding: 25px 5% 8px;
+    }
+
+    .wii-screen { padding: 25px 12px 165px; }
+    .wii-circle,
+    .mail-circle { width: 42px; height: 42px; }
+    .wii-time { font-size: 23px; }
+    .wii-date { font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+    .channel-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .channel { height: 115px; }
+}
+
+@media (max-width: 420px) {
+    .game-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 1250px) {
+    .page-arrows {
+        right: -42px;
+        left: -42px;
+        top: 50%;
+        flex-direction: row;
+        justify-content: space-between;
+        transform: translateY(-50%);
+    }
+
+    .page-arrow { width: 34px; height: 44px; font-size: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .channel-gloss { animation: none; }
+
+    .channel,
+    .channel-preview img,
+    .page-arrow,
+    .wii-circle,
+    .mail-circle,
+    .wii-opening-overlay,
+    .wii-opening-panel,
+    .wii-action-button {
+        transition: none;
+    }
+}
+
+
+/* Wii Menu Action Buttons */
+.wii-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.wii-menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 18px;
+    border: 1px solid #b8e8f8;
+    border-radius: 24px;
+    background: linear-gradient(#ffffff, #e5f7fd);
+    color: #159acb;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+}
+
+.wii-menu-button:hover {
+    background: linear-gradient(#e5f8ff, #c9efff);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+}
+
+.wii-menu-button:active {
+    transform: translateY(0);
+}
+
+
+/* ==========================================
+   WII THEME TOGGLE
+========================================== */
+
+.theme-toggle {
+    width: 44px;
+    height: 44px;
+    margin-right: 12px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 50%;
+    border: 2px solid #76cce9;
+
+    background: linear-gradient(145deg, #ffffff, #d9edf5);
+    color: #269fca;
+
+    font-size: 19px;
+    cursor: pointer;
+
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(38,159,202,0.35);
+}
+
+
+/* ==========================================
+   WII MIDNIGHT THEME
+========================================== */
+
+body.wii-body[data-theme="midnight"] {
+    background:
+        radial-gradient(
+            ellipse at 50% 30%,
+            #263b4b 0%,
+            #172633 55%,
+            #101820 100%
+        );
+
+    background-attachment: fixed;
+    color: #eaf7fc;
+}
+
+/* Header */
+
+body.wii-body[data-theme="midnight"] .wii-brand {
+    color: #55d4ff;
+    text-shadow: 0 0 12px rgba(66,200,245,0.35);
+}
+
+body.wii-body[data-theme="midnight"] .wii-counter {
+    color: #a6c4d2;
+}
+
+/* Channel tiles */
+
+body.wii-body[data-theme="midnight"] .channel {
+    background: linear-gradient(
+        180deg,
+        #263746 0%,
+        #1b2935 100%
+    );
+
+    border-color: #405768;
+
+    box-shadow:
+        0 3px 8px rgba(0,0,0,0.35),
+        inset 0 1px 2px rgba(255,255,255,0.08);
+}
+
+body.wii-body[data-theme="midnight"] .channel:not(.empty-slot):hover {
+    border-color: #55d4ff;
+
+    box-shadow:
+        0 0 0 2px rgba(66,200,245,0.25),
+        0 5px 20px rgba(0,170,230,0.25);
+}
+
+/* Empty channels */
+
+body.wii-body[data-theme="midnight"] .empty-channel {
+    background:
+        repeating-linear-gradient(
+            135deg,
+            #293b49 0px,
+            #293b49 2px,
+            #233441 2px,
+            #233441 4px
+        );
+
+    box-shadow: inset 0 1px 5px rgba(0,0,0,0.25);
+}
+
+/* Channel gloss */
+
+body.wii-body[data-theme="midnight"] .channel-gloss {
+    background: linear-gradient(
+        125deg,
+        rgba(255,255,255,0.12) 0%,
+        rgba(255,255,255,0.04) 25%,
+        transparent 48%,
+        rgba(66,200,245,0.06) 75%,
+        transparent 100%
+    );
+
+    background-size: 200% 200%;
+}
+
+/* Pagination arrows */
+
+body.wii-body[data-theme="midnight"] .page-arrow {
+    color: #55d4ff;
+
+    background: linear-gradient(
+        90deg,
+        #263b4b,
+        #1b2d3a
+    );
+
+    border-color: #45677b;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+body.wii-body[data-theme="midnight"] .page-arrow:not(.disabled):hover {
+    background: #304e61;
+}
+
+/* Bottom dock */
+
+body.wii-body[data-theme="midnight"] .wii-dock {
+    background: linear-gradient(
+        180deg,
+        #263d4d 0%,
+        #1b3040 45%,
+        #142633 100%
+    );
+
+    border-top-color: #55d4ff;
+
+    box-shadow:
+        0 -5px 22px rgba(0,0,0,0.35),
+        inset 0 4px 8px rgba(130,210,240,0.08);
+}
+
+/* Dock buttons */
+
+body.wii-body[data-theme="midnight"] .wii-circle,
+body.wii-body[data-theme="midnight"] .mail-circle,
+body.wii-body[data-theme="midnight"] .theme-toggle {
+    background: linear-gradient(
+        145deg,
+        #304b5d,
+        #1b3040
+    );
+
+    border-color: #55d4ff;
+    color: #8de2ff;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.3),
+        inset 0 1px 3px rgba(255,255,255,0.08);
+}
+
+/* Digital clock */
+
+body.wii-body[data-theme="midnight"] .dock-center {
+    color: #9bdcf2;
+}
+
+body.wii-body[data-theme="midnight"] .wii-time {
+    color: #72d9ff;
+    text-shadow: 0 0 12px rgba(66,200,245,0.3);
+}
+
+body.wii-body[data-theme="midnight"] .wii-date {
+    color: #a6c4d2;
+}
+
+/* Add Game and Refresh buttons */
+
+body.wii-body[data-theme="midnight"] .wii-menu-button {
+    background: linear-gradient(
+        145deg,
+        #304b5d,
+        #1b3040
+    );
+
+    color: #8de2ff;
+    border-color: #55d4ff;
+}
+
+body.wii-body[data-theme="midnight"] .wii-menu-button:hover {
+    background: linear-gradient(
+        145deg,
+        #3b6077,
+        #25465b
+    );
+
+    box-shadow: 0 0 14px rgba(66,200,245,0.2);
+}
+
+/* Smooth theme transition */
+
+body.wii-body,
+body.wii-body .channel,
+body.wii-body .wii-dock,
+body.wii-body .wii-circle,
+body.wii-body .mail-circle,
+body.wii-body .theme-toggle {
+    transition:
+        background 0.35s ease,
+        background-color 0.35s ease,
+        border-color 0.35s ease,
+        color 0.35s ease,
+        box-shadow 0.35s ease;
+}
+
+/* WII OPENING OVERLAY - MIDNIGHT */
+
+body.wii-body[data-theme="midnight"] .wii-opening-overlay {
+    background: rgba(5, 13, 20, 0.82);
+}
+
+body.wii-body[data-theme="midnight"] .wii-opening-panel {
+    background: #1b2d3a;
+    border-color: #405b6d;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.5);
+}
+
+body.wii-body[data-theme="midnight"] .wii-opening-header {
+    color: #55d4ff;
+    border-color: #405b6d;
+}
+
+body.wii-body[data-theme="midnight"] .wii-opening-title {
+    color: #eaf7fc;
+}
+
+body.wii-body[data-theme="midnight"] .wii-action-button {
+    background: linear-gradient(#304b5d, #1b3040);
+    color: #8de2ff;
+    border-color: #55d4ff;
+}
+
+body.wii-body[data-theme="midnight"] .wii-action-button.primary {
+    background: linear-gradient(#35b9e5, #168ab8);
+    color: white;
+}
+
+.wii-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.theme-toggle {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 50%;
+    border: 1px solid #c7e6f2;
+
+    background: linear-gradient(145deg, #ffffff, #d9edf5);
+    color: #269fca;
+
+    font-size: 17px;
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+
+/* =====================================
+   WII CREATE GAME PAGE
+===================================== */
+
+.wii-form-page {
+    min-height: 100vh;
+    padding: 28px 20px 45px;
+    background: linear-gradient(180deg, #ffffff, #eaf8fc);
+    color: #526c79;
+    transition: background .3s ease, color .3s ease;
+}
+
+.wii-form-top {
+    max-width: 850px;
+    margin: 0 auto 25px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.wii-back-button,
+.wii-cancel-button {
+    text-decoration: none;
+    color: #239fc9;
+    background: linear-gradient(145deg, #fff, #e2f5fb);
+    border: 1px solid #bdeafa;
+    border-radius: 30px;
+    padding: 10px 20px;
+    box-shadow: 0 3px 9px rgba(50, 150, 190, .15);
+    transition: .2s ease;
+}
+
+.wii-back-button:hover,
+.wii-cancel-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(50, 150, 190, .25);
+}
+
+.wii-form-container {
+    max-width: 850px;
+    margin: auto;
+    padding: 35px 42px;
+    border: 1px solid #d5edf6;
+    border-radius: 25px;
+    background: rgba(255,255,255,.9);
+    box-shadow: 0 8px 25px rgba(80,150,175,.13);
+}
+
+.wii-form-heading {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.wii-form-icon {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.wii-form-heading h1 {
+    color: #279fc8;
+    font-size: 27px;
+    margin: 0 0 8px;
+}
+
+.wii-form-heading p,
+.wii-section-description {
+    color: #8ba2ad;
+    font-size: 14px;
+}
+
+.wii-form-section {
+    padding: 22px 0;
+    border-bottom: 1px solid #e1eff4;
+}
+
+.wii-form-section h3 {
+    color: #279fc8;
+    font-size: 17px;
+    margin: 0 0 18px;
+}
+
+.wii-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex: 1;
+}
+
+.wii-field label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #526c79;
+}
+
+.wii-field input,
+.wii-field select,
+.wii-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #cce5ef;
+    border-radius: 10px;
+    background: #fafdff;
+    color: #526c79;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: .2s ease;
+}
+
+.wii-field input:focus,
+.wii-field select:focus,
+.wii-field textarea:focus {
+    border-color: #53c5ec;
+    box-shadow: 0 0 0 3px rgba(83,197,236,.15);
+    background: white;
+}
+
+.wii-field textarea {
+    resize: vertical;
+}
+
+.wii-field small {
+    color: #91aab5;
+    font-size: 12px;
+}
+
+.wii-field-row {
+    display: flex;
+    gap: 18px;
+}
+
+.wii-platform-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.wii-platform-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 15px;
+    border: 1px solid #d5eaf2;
+    border-radius: 10px;
+    background: #f8fcfe;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.wii-platform-option:hover {
+    border-color: #6ccdec;
+    background: #eaf8fd;
+}
+
+.wii-platform-option input {
+    accent-color: #32b4df;
+    width: 17px;
+    height: 17px;
+}
+
+.wii-platform-option span {
+    font-size: 13px;
+}
+
+.wii-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 25px;
+}
+
+.wii-submit-button {
+    border: 1px solid #269fca;
+    border-radius: 25px;
+    padding: 12px 25px;
+    color: white;
+    font-weight: 600;
+    background: linear-gradient(180deg, #67d2f2, #269fca);
+    box-shadow: 0 4px 10px rgba(38,159,202,.25);
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.wii-submit-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(38,159,202,.35);
+}
+
+.wii-form-errors {
+    padding: 15px 18px;
+    margin-bottom: 20px;
+    color: #a33d3d;
+    background: #fff0f0;
+    border: 1px solid #f2caca;
+    border-radius: 12px;
+}
+
+.wii-form-errors ul {
+    margin-bottom: 0;
+}
+
+.wii-form-footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #9bb7c3;
+}
+
+/* =====================================
+   WII MIDNIGHT THEME
+===================================== */
+
+body.wii-body[data-theme="midnight"] .wii-form-page {
+    background: linear-gradient(180deg, #101e2b, #07131e);
+    color: #d9edf5;
+}
+
+body.wii-body[data-theme="midnight"] .wii-form-container {
+    background: #192c3a;
+    border-color: #365367;
+    box-shadow: 0 8px 30px rgba(0,0,0,.3);
+}
+
+body.wii-body[data-theme="midnight"] .wii-form-heading h1,
+body.wii-body[data-theme="midnight"] .wii-form-section h3 {
+    color: #61d4fa;
+}
+
+body.wii-body[data-theme="midnight"] .wii-form-heading p,
+body.wii-body[data-theme="midnight"] .wii-section-description,
+body.wii-body[data-theme="midnight"] .wii-form-footer {
+    color: #8baaba;
+}
+
+body.wii-body[data-theme="midnight"] .wii-field label {
+    color: #d4e8f0;
+}
+
+body.wii-body[data-theme="midnight"] .wii-field input,
+body.wii-body[data-theme="midnight"] .wii-field select,
+body.wii-body[data-theme="midnight"] .wii-field textarea {
+    background: #102330;
+    color: #e4f5fc;
+    border-color: #3b5c70;
+}
+
+body.wii-body[data-theme="midnight"] .wii-platform-option {
+    background: #142937;
+    border-color: #365367;
+    color: #d9edf5;
+}
+
+body.wii-body[data-theme="midnight"] .wii-platform-option:hover {
+    background: #203d50;
+    border-color: #55c8ee;
+}
+
+body.wii-body[data-theme="midnight"] .wii-form-section {
+    border-color: #304958;
+}
+
+body.wii-body[data-theme="midnight"] .wii-back-button,
+body.wii-body[data-theme="midnight"] .wii-cancel-button {
+    color: #68d5fa;
+    background: #1c3444;
+    border-color: #42657a;
+}
+
+body.wii-body[data-theme="midnight"] .theme-toggle {
+    background: #1c3444;
+    border-color: #42657a;
+    color: #68d5fa;
+}
+
+body.wii-body[data-theme="midnight"] .wii-form-errors {
+    background: #402a31;
+    color: #ffc0c0;
+    border-color: #75434b;
+}
+
+@media (max-width: 650px) {
+    .wii-form-container {
+        padding: 25px 18px;
+    }
+
+    .wii-field-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .wii-platform-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wii-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .wii-form-actions a,
+    .wii-form-actions button {
+        text-align: center;
+        justify-content: center;
+    }
+}
+
+/* WII EDIT BUTTON */
+
+.wii-edit-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    border: 1px solid #b9e7f5;
+
+    background: linear-gradient(145deg, #ffffff, #d9f2fa);
+    color: #269fca;
+
+    font-size: 19px;
+    text-decoration: none;
+
+    box-shadow: 0 2px 7px rgba(0,0,0,.15);
+    opacity: 0;
+    transform: scale(.8);
+    transition: .2s ease;
+    z-index: 5;
+}
+
+.channel:hover .wii-edit-button {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.wii-edit-button:hover {
+    background: #269fca;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Midnight */
+body.wii-body[data-theme="midnight"] .wii-edit-button {
+    background: #19394c;
+    border-color: #55d4ff;
+    color: #72ddff;
+}
+.wii-edit-button {
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* EDIT PAGE BUTTON */
+
+.wii-edit-submit {
+    border: 1px solid #269fca;
+    border-radius: 25px;
+    padding: 12px 25px;
+    color: white;
+    font-weight: 600;
+    background: linear-gradient(180deg, #67d2f2, #269fca);
+    box-shadow: 0 4px 10px rgba(38,159,202,.25);
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.wii-edit-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(38,159,202,.35);
+}
+
+/* CURRENT COVER */
+
+.wii-current-cover {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 12px 0 18px;
+}
+
+.wii-current-cover img {
+    width: 150px;
+    height: 210px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid #c9eaf5;
+    box-shadow: 0 5px 14px rgba(0,0,0,.15);
+}
+
+.wii-current-cover p {
+    margin: 0;
+    font-size: 13px;
+    color: #8ba2ad;
+}
+
+body.wii-body[data-theme="midnight"] .wii-current-cover img {
+    border-color: #55d4ff;
+}
+
+/* =========================================
+   WII CLASSIC - ORIGINAL SYSTEM MENU LOOK
+========================================= */
+
+body.wii-body[data-theme="classic"] {
+    background-color: #d9dcde !important;
+
+    background-image:
+        repeating-linear-gradient(
+            0deg,
+            rgba(255,255,255,.22) 0px,
+            rgba(255,255,255,.22) 1px,
+            rgba(170,175,180,.08) 2px,
+            rgba(170,175,180,.08) 3px
+        ),
+        linear-gradient(
+            180deg,
+            #e5e7e8 0%,
+            #d6d9db 55%,
+            #cbd0d2 100%
+        ) !important;
+
+    background-attachment: fixed;
+}
+
+/* Area utama menu */
+body.wii-body[data-theme="classic"] .wii-screen {
+    background: transparent !important;
+}
+
+/* Area channel */
+body.wii-body[data-theme="classic"] .wii-menu {
+    background: transparent !important;
+}
+
+/* Channel kosong */
+body.wii-body[data-theme="classic"] .channel {
+    background: linear-gradient(
+        145deg,
+        #eeeeee 0%,
+        #e2e3e4 55%,
+        #d1d3d4 100%
+    );
+
+    border: 1px solid #bfc4c7;
+    box-shadow:
+        0 3px 5px rgba(0,0,0,.20),
+        inset 0 1px 2px rgba(255,255,255,.9);
+}
+
+/* Efek hover channel */
+body.wii-body[data-theme="classic"] .channel:hover {
+    box-shadow:
+        0 0 0 2px #71d5f2,
+        0 5px 14px rgba(0,0,0,.22);
+}
+
+/* Wii Silver Dock */
+
+body.wii-body[data-theme="classic"] .wii-dock {
+    background: linear-gradient(
+        180deg,
+        #d0d3d5 0%,
+        #e9ebec 35%,
+        #dce1e3 100%
+    );
+
+    border-top: 3px solid #76d7f2;
+
+    box-shadow:
+        inset 0 3px 8px rgba(255,255,255,.8),
+        0 -3px 10px rgba(0,0,0,.08);
+}
+
+/* Hilangkan garis lurus di atas dock */
+.wii-dock {
+    border-top: none !important;
+    outline: none !important;
+}
+
+/* Hilangkan garis dari pseudo-element dock */
+.wii-dock::before {
+    border-top: none !important;
+    outline: none !important;
+}
+
+/* =====================================
+   WII GAME DETAILS
+===================================== */
+
+.wii-detail-content {
+    text-align: center;
+}
+
+.wii-detail-cover img {
+    width: 210px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.2);
+    border: 2px solid #c9eaf5;
+}
+
+.wii-detail-title {
+    font-size: 25px;
+    color: #279fc8;
+    margin: 18px 0 25px;
+}
+
+.wii-detail-info {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    text-align: left;
+}
+
+.wii-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 15px;
+    border-radius: 12px;
+    background: #f3f8fa;
+    border: 1px solid #d5eaf2;
+}
+
+.wii-detail-item span {
+    color: #8ba2ad;
+    font-size: 12px;
+}
+
+.wii-detail-item strong {
+    color: #526c79;
+    font-size: 14px;
+}
+
+.wii-detail-description {
+    margin-top: 22px;
+    padding: 18px;
+    text-align: left;
+    background: #f3f8fa;
+    border: 1px solid #d5eaf2;
+    border-radius: 12px;
+}
+
+.wii-detail-description h3 {
+    color: #279fc8;
+    margin-top: 0;
+}
+
+.wii-detail-description p {
+    color: #526c79;
+    line-height: 1.7;
+    white-space: pre-line;
+}
+
+body.wii-body[data-theme="midnight"] .wii-detail-title {
+    color: #61d4fa;
+}
+
+body.wii-body[data-theme="midnight"] .wii-detail-item,
+body.wii-body[data-theme="midnight"] .wii-detail-description {
+    background: #142937;
+    border-color: #365367;
+}
+
+body.wii-body[data-theme="midnight"] .wii-detail-item strong,
+body.wii-body[data-theme="midnight"] .wii-detail-description p {
+    color: #d9edf5;
+}
+
+body.wii-body[data-theme="midnight"] .wii-detail-description h3 {
+    color: #61d4fa;
+}
+
+@media (max-width: 600px) {
+    .wii-detail-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* WII LOGOUT BUTTON */
+
+.logout-form {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.wii-logout-button {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    border: 1px solid #c7e6f2;
+
+    background: linear-gradient(145deg, #ffffff, #d9edf5);
+    color: #269fca;
+
+    font-size: 22px;
+    cursor: pointer;
+
+    box-shadow: 0 3px 9px rgba(50,150,190,.15);
+    transition: .2s ease;
+}
+
+.wii-logout-button:hover {
+    transform: scale(1.1);
+    background: linear-gradient(145deg, #e8faff, #bceafa);
+}
+
+body.wii-body[data-theme="midnight"] .wii-logout-button {
+    background: #1c3444;
+    border-color: #42657a;
+    color: #68d5fa;
+}
+
+
+/* =========================================
+   GAMEBACKLOG - WII LOGIN PAGE
+========================================= */
+
+.auth-page {
+    min-height: 100vh;
+    margin: 0;
+    padding: 35px 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(180, 190, 195, .10) 0px,
+            rgba(180, 190, 195, .10) 1px,
+            transparent 1px,
+            transparent 4px
+        ),
+        linear-gradient(145deg, #e8edef, #cfd8dc);
+}
+
+
+/* Main Container */
+
+.auth-container {
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+}
+
+
+/* Theme Button */
+
+.auth-theme-control {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;
+}
+
+
+/* Login Card */
+
+.auth-card {
+    overflow: hidden;
+
+    background: linear-gradient(
+        145deg,
+        #ffffff,
+        #f5f9fb
+    );
+
+    border: 1px solid #c9e0e9;
+    border-radius: 22px;
+
+    box-shadow:
+        0 15px 40px rgba(60, 100, 120, .16),
+        inset 0 2px 3px rgba(255,255,255,.9);
+}
+
+
+/* Header */
+
+.auth-header {
+    text-align: center;
+    padding: 25px 20px 20px;
+
+    border-bottom: 1px solid #dce9ee;
+}
+
+.auth-header h1 {
+    margin: 0;
+
+    color: #35acd3;
+
+    font-size: 25px;
+    letter-spacing: 5px;
+    font-weight: 800;
+}
+
+.auth-header p {
+    margin: 7px 0 0;
+
+    color: #91a8b2;
+    font-size: 10px;
+    letter-spacing: 3px;
+}
+
+
+/* Introduction */
+
+.auth-intro {
+    text-align: center;
+    padding: 25px 20px 15px;
+}
+
+.auth-icon {
+    font-size: 43px;
+    margin-bottom: 8px;
+}
+
+.auth-intro h2 {
+    margin: 0;
+
+    color: #319fc5;
+    font-size: 25px;
+}
+
+.auth-intro p {
+    margin: 9px 0 0;
+
+    color: #8299a4;
+    font-size: 13px;
+}
+
+
+/* Form */
+
+.auth-form {
+    padding: 15px 35px 20px;
+}
+
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin-bottom: 19px;
+}
+
+.auth-field label {
+    color: #597582;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.auth-field input {
+    width: 100%;
+    height: 46px;
+
+    padding: 0 14px;
+    box-sizing: border-box;
+
+    border: 1px solid #cbdfe7;
+    border-radius: 10px;
+
+    background: #f3f8fa;
+
+    color: #49616d;
+    font-size: 14px;
+
+    outline: none;
+
+    transition: .2s ease;
+}
+
+.auth-field input::placeholder {
+    color: #a4b5bd;
+}
+
+.auth-field input:focus {
+    border-color: #48b9df;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 0 0 3px rgba(72,185,223,.15);
+}
+
+
+/* Login Button */
+
+.auth-submit {
+    width: 100%;
+    height: 48px;
+
+    margin-top: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    border: 1px solid #36acd1;
+    border-radius: 30px;
+
+    background: linear-gradient(
+        180deg,
+        #61d1f0,
+        #28a9d3
+    );
+
+    color: white;
+
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 10px rgba(40,169,211,.25);
+
+    transition: .2s ease;
+}
+
+.auth-submit:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 7px 15px rgba(40,169,211,.35);
+}
+
+.auth-submit span {
+    font-size: 20px;
+}
+
+
+/* Register */
+
+.auth-register {
+    text-align: center;
+    padding: 0 15px 20px;
+}
+
+.auth-register p {
+    color: #8399a3;
+    font-size: 13px;
+}
+
+.auth-register a {
+    color: #27a8d1;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-register a:hover {
+    text-decoration: underline;
+}
+
+
+/* Errors */
+
+.auth-errors {
+    margin: 0 35px 10px;
+    padding: 10px 14px;
+
+    background: #fff0f0;
+    border: 1px solid #f1baba;
+    border-radius: 9px;
+}
+
+.auth-errors p {
+    margin: 4px 0;
+
+    color: #c44d4d;
+    font-size: 12px;
+}
+
+
+/* Footer */
+
+.auth-footer {
+    padding: 15px;
+
+    text-align: center;
+
+    border-top: 1px solid #e1ebef;
+
+    color: #a1b2ba;
+
+    font-size: 9px;
+    letter-spacing: 2px;
+}
+
+.auth-bottom-text {
+    margin-top: 22px;
+
+    text-align: center;
+
+    color: #8ca1aa;
+
+    font-size: 10px;
+    letter-spacing: 3px;
+}
+
+
+/* =========================================
+   WII MIDNIGHT THEME
+========================================= */
+
+body.auth-page[data-theme="midnight"] {
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(100,180,210,.035) 0px,
+            rgba(100,180,210,.035) 1px,
+            transparent 1px,
+            transparent 4px
+        ),
+        linear-gradient(145deg, #0b1924, #142b39);
+}
+
+body.auth-page[data-theme="midnight"] .auth-card {
+    background: linear-gradient(
+        145deg,
+        #1c3443,
+        #142936
+    );
+
+    border-color: #3a5a6d;
+
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.35);
+}
+
+body.auth-page[data-theme="midnight"] .auth-header {
+    border-color: #365365;
+}
+
+body.auth-page[data-theme="midnight"] .auth-header h1,
+body.auth-page[data-theme="midnight"] .auth-intro h2 {
+    color: #62d6fa;
+}
+
+body.auth-page[data-theme="midnight"] .auth-header p,
+body.auth-page[data-theme="midnight"] .auth-intro p,
+body.auth-page[data-theme="midnight"] .auth-register p {
+    color: #a0b9c7;
+}
+
+body.auth-page[data-theme="midnight"] .auth-field label {
+    color: #c0d8e4;
+}
+
+body.auth-page[data-theme="midnight"] .auth-field input {
+    background: #102633;
+    border-color: #405f71;
+    color: #e5f6ff;
+}
+
+body.auth-page[data-theme="midnight"] .auth-field input:focus {
+    border-color: #62d6fa;
+    background: #183443;
+}
+
+body.auth-page[data-theme="midnight"] .auth-field input::placeholder {
+    color: #8199a7;
+}
+
+body.auth-page[data-theme="midnight"] .auth-register a {
+    color: #62d6fa;
+}
+
+body.auth-page[data-theme="midnight"] .auth-footer {
+    border-color: #365365;
+    color: #829eac;
+}
+
+body.auth-page[data-theme="midnight"] .auth-bottom-text {
+    color: #8199a7;
+}
+
+body.auth-page[data-theme="midnight"] .theme-toggle {
+    background: #1c3444;
+    border-color: #42657a;
+    color: #68d5fa;
+}
+
+
+/* Responsive */
+
+@media (max-width: 500px) {
+
+    .auth-page {
+        padding: 20px 15px;
+    }
+
+    .auth-form {
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+
+    .auth-errors {
+        margin-left: 22px;
+        margin-right: 22px;
+    }
+
+    .auth-header h1 {
+        font-size: 21px;
+    }
+
+}
+
+
+/* =========================================
+   GAMEBACKLOG - WII USER DASHBOARD
+========================================= */
+
+.dashboard-page {
+    min-height: 100vh;
+    margin: 0;
+    padding: 35px 20px;
+
+    box-sizing: border-box;
+
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(180,190,195,.10) 0px,
+            rgba(180,190,195,.10) 1px,
+            transparent 1px,
+            transparent 4px
+        ),
+        linear-gradient(145deg, #e8edef, #cfd8dc);
+}
+
+.dashboard-container {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+
+/* Top Bar */
+
+.dashboard-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.dashboard-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dashboard-role {
+    padding: 8px 16px;
+
+    border: 1px solid #c9e5ef;
+    border-radius: 20px;
+
+    background: #f4fafc;
+
+    color: #36a6cc;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+
+/* Main Card */
+
+.dashboard-card {
+    overflow: hidden;
+
+    background: linear-gradient(
+        145deg,
+        #ffffff,
+        #f5f9fb
+    );
+
+    border: 1px solid #c9e0e9;
+    border-radius: 22px;
+
+    box-shadow:
+        0 15px 40px rgba(60,100,120,.16),
+        inset 0 2px 3px rgba(255,255,255,.9);
+}
+
+
+/* Welcome */
+
+.dashboard-welcome {
+    padding: 35px 25px 30px;
+    text-align: center;
+
+    border-bottom: 1px solid #dce9ee;
+}
+
+.dashboard-avatar {
+    width: 75px;
+    height: 75px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 15px;
+
+    border: 2px solid #c7e9f3;
+    border-radius: 50%;
+
+    background: linear-gradient(
+        145deg,
+        #ffffff,
+        #e1f3f8
+    );
+
+    font-size: 35px;
+
+    box-shadow: 0 5px 15px rgba(50,150,190,.15);
+}
+
+.dashboard-subtitle {
+    color: #94aab4;
+    font-size: 9px;
+    letter-spacing: 3px;
+}
+
+.dashboard-welcome h1 {
+    margin: 12px 0;
+
+    color: #35acd3;
+    font-size: 30px;
+}
+
+.dashboard-welcome h2 {
+    margin: 0;
+
+    color: #536f7c;
+    font-size: 19px;
+}
+
+.dashboard-description {
+    margin-top: 12px;
+
+    color: #879ca6;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+
+/* Navigation Cards */
+
+.dashboard-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+
+    padding: 25px;
+}
+
+.dashboard-menu-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    min-width: 0;
+    padding: 18px;
+
+    text-decoration: none;
+
+    background: #f0f7fa;
+    border: 1px solid #d1e7ef;
+    border-radius: 14px;
+
+    transition: .2s ease;
+}
+
+.dashboard-menu-card:hover {
+    transform: translateY(-3px);
+
+    background: #e3f4fa;
+
+    border-color: #71cbe8;
+
+    box-shadow: 0 5px 15px rgba(50,150,190,.12);
+}
+
+.dashboard-menu-icon {
+    flex-shrink: 0;
+
+    width: 43px;
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    font-size: 22px;
+}
+
+.dashboard-menu-card h3 {
+    margin: 0;
+
+    color: #3c9fc2;
+    font-size: 14px;
+}
+
+.dashboard-menu-card p {
+    margin: 6px 0 0;
+
+    color: #899fa9;
+    font-size: 11px;
+}
+
+.dashboard-arrow {
+    margin-left: auto;
+
+    color: #55b6d8;
+    font-size: 25px;
+}
+
+
+/* Account Information */
+
+.dashboard-account {
+    margin: 0 25px 25px;
+    padding: 20px;
+
+    background: #f5f9fb;
+
+    border: 1px solid #d9e9ef;
+    border-radius: 14px;
+}
+
+.dashboard-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 16px;
+}
+
+.dashboard-section-heading h3 {
+    margin: 0;
+
+    color: #399fc2;
+    font-size: 15px;
+}
+
+.dashboard-section-heading span {
+    color: #9aafb8;
+    font-size: 9px;
+    letter-spacing: 2px;
+}
+
+.dashboard-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.dashboard-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    padding: 13px;
+
+    background: #ffffff;
+    border: 1px solid #e0ebef;
+    border-radius: 10px;
+}
+
+.dashboard-info-item span {
+    color: #91a5ae;
+    font-size: 11px;
+}
+
+.dashboard-info-item strong {
+    color: #526d79;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+
+/* Bottom Buttons */
+
+.dashboard-bottom-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+
+    padding: 0 25px 25px;
+}
+
+.dashboard-bottom-actions form {
+    margin: 0;
+}
+
+.dashboard-enter-button,
+.dashboard-logout-button {
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    padding: 0 23px;
+
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+    text-decoration: none;
+
+    transition: .2s ease;
+}
+
+.dashboard-enter-button {
+    background: linear-gradient(180deg, #61d1f0, #28a9d3);
+
+    border: 1px solid #36acd1;
+    color: #ffffff;
+
+    box-shadow: 0 4px 10px rgba(40,169,211,.2);
+}
+
+.dashboard-enter-button:hover {
+    transform: translateY(-2px);
+}
+
+.dashboard-logout-button {
+    background: #ffffff;
+
+    border: 1px solid #d5e4ea;
+    color: #829ba7;
+}
+
+.dashboard-logout-button:hover {
+    background: #fff0f0;
+    border-color: #e9aaaa;
+    color: #c75d5d;
+}
+
+
+/* Footer */
+
+.dashboard-footer {
+    padding: 17px;
+
+    text-align: center;
+
+    border-top: 1px solid #e1ebef;
+
+    color: #a1b2ba;
+    font-size: 9px;
+    letter-spacing: 2px;
+}
+
+.dashboard-bottom-text {
+    margin-top: 22px;
+
+    text-align: center;
+
+    color: #8ca1aa;
+    font-size: 10px;
+    letter-spacing: 3px;
+}
+
+
+/* =========================================
+   WII MIDNIGHT DASHBOARD
+========================================= */
+
+body.dashboard-page[data-theme="midnight"] {
+    background:
+        repeating-linear-gradient(
+            0deg,
+            rgba(100,180,210,.035) 0px,
+            rgba(100,180,210,.035) 1px,
+            transparent 1px,
+            transparent 4px
+        ),
+        linear-gradient(145deg, #0b1924, #142b39);
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-card {
+    background: linear-gradient(145deg, #1c3443, #142936);
+    border-color: #3a5a6d;
+    box-shadow: 0 15px 40px rgba(0,0,0,.35);
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-welcome,
+body.dashboard-page[data-theme="midnight"] .dashboard-footer {
+    border-color: #365365;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-welcome h1,
+body.dashboard-page[data-theme="midnight"] .dashboard-section-heading h3 {
+    color: #62d6fa;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-welcome h2 {
+    color: #d9edf5;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-description,
+body.dashboard-page[data-theme="midnight"] .dashboard-subtitle,
+body.dashboard-page[data-theme="midnight"] .dashboard-footer,
+body.dashboard-page[data-theme="midnight"] .dashboard-bottom-text {
+    color: #91aebc;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-role {
+    background: #1c3444;
+    border-color: #42657a;
+    color: #68d5fa;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-avatar {
+    background: #102633;
+    border-color: #42657a;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-menu-card {
+    background: #183342;
+    border-color: #36596b;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-menu-card:hover {
+    background: #204356;
+    border-color: #62d6fa;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-menu-card h3 {
+    color: #62d6fa;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-menu-card p,
+body.dashboard-page[data-theme="midnight"] .dashboard-section-heading span {
+    color: #9ab6c5;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-menu-icon {
+    background: #102633;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-account {
+    background: #142936;
+    border-color: #365365;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-info-item {
+    background: #1b3544;
+    border-color: #365365;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-info-item span {
+    color: #9ab6c5;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-info-item strong {
+    color: #e0f1f8;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-logout-button {
+    background: #1c3444;
+    border-color: #42657a;
+    color: #b8d0dc;
+}
+
+body.dashboard-page[data-theme="midnight"] .dashboard-logout-button:hover {
+    background: #493039;
+    border-color: #b56b78;
+    color: #ffc2ca;
+}
+
+body.dashboard-page[data-theme="midnight"] .theme-toggle {
+    background: #1c3444;
+    border-color: #42657a;
+    color: #68d5fa;
+}
+
+
+/* Responsive */
+
+@media (max-width: 600px) {
+
+    .dashboard-page {
+        padding: 20px 12px;
+    }
+
+    .dashboard-actions {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+
+    .dashboard-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-account {
+        margin: 0 18px 20px;
+    }
+
+    .dashboard-welcome h1 {
+        font-size: 25px;
+    }
+
+    .dashboard-bottom-actions {
+        flex-direction: column;
+        padding: 0 18px 22px;
+    }
+
+    .dashboard-bottom-actions form,
+    .dashboard-enter-button,
+    .dashboard-logout-button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+}
+
+
+/* ========================================
+   PERSONAL LIBRARY BUTTON
+======================================== */
+
+.wii-library-form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.wii-library-submit {
+    border: 1px solid #65c9e9;
+    border-radius: 30px;
+    padding: 13px 24px;
+    background: linear-gradient(145deg, #dff7ff, #a9e7f8);
+    color: #168bb5;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+    transition: all 0.25s ease;
+}
+
+.wii-library-submit:hover {
+    background: linear-gradient(145deg, #55c9ed, #20a9d5);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 7px 16px rgba(35, 169, 213, 0.3);
+}
+
+/* ========================================
+   LIBRARY NOTIFICATIONS
+======================================== */
+
+.wii-alert {
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.wii-alert-success {
+    background: #e3f7e9;
+    color: #247b42;
+    border: 1px solid #9cdbad;
+}
+
+.wii-alert-error {
+    background: #fff0ed;
+    color: #b64235;
+    border: 1px solid #f0b4aa;
+}
+
+/* ========================================
+   MIDNIGHT THEME
+======================================== */
+
+body.wii-body[data-theme="midnight"] .wii-library-submit {
+    background: linear-gradient(145deg, #183f55, #12617f);
+    border-color: #55d4ff;
+    color: #a5eaff;
+}
+
+body.wii-body[data-theme="midnight"] .wii-library-submit:hover {
+    background: linear-gradient(145deg, #167ca5, #075477);
+    color: white;
+}
+
+body.wii-body[data-theme="midnight"] .wii-alert-success {
+    background: #183d32;
+    color: #a5edbd;
+    border-color: #347c58;
+}
+
+body.wii-body[data-theme="midnight"] .wii-alert-error {
+    background: #482b30;
+    color: #ffb8b8;
+    border-color: #875056;
+}
+
+
+/* =========================================
+   PERSONAL LIBRARY
+========================================= */
+
+.library-page {
+    width: min(1100px, 92%);
+    margin: 0 auto;
+    padding: 35px 0 45px;
+    min-height: 100vh;
+}
+
+.library-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+    margin-bottom: 35px;
+}
+
+.library-heading {
+    text-align: center;
+    flex: 1;
+    padding: 15px 20px;
+}
+
+.library-icon {
+    font-size: 38px;
+}
+
+.library-heading h1 {
+    color: #26b9ed;
+    font-size: 30px;
+    margin: 10px 0;
+}
+
+.library-heading p {
+    color: #829eac;
+    margin: 0;
+}
+
+.library-summary {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.library-summary-card {
+    min-width: 180px;
+    padding: 18px 25px;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #ffffff, #e9f5fa);
+    border: 1px solid #c6e4ef;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
+}
+
+.library-summary-card span,
+.library-game-meta span {
+    display: block;
+    font-size: 12px;
+    color: #829eac;
+    margin-bottom: 7px;
+}
+
+.library-summary-card strong {
+    display: block;
+    color: #169dc9;
+    font-size: 28px;
+}
+
+.library-content {
+    padding: 25px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, .55);
+    border: 1px solid #d2e6ed;
+}
+
+.library-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.library-section-heading h2 {
+    color: #269fca;
+    font-size: 22px;
+    margin: 0;
+}
+
+.library-section-heading span {
+    color: #829eac;
+    font-size: 13px;
+}
+
+.library-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.library-game-card {
+    display: flex;
+    gap: 16px;
+    padding: 14px;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #ffffff, #f0f7fa);
+    border: 1px solid #d1e6ed;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .07);
+    transition: .2s ease;
+}
+
+.library-game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
+}
+
+.library-game-cover {
+    width: 105px;
+    min-width: 105px;
+    height: 145px;
+    overflow: hidden;
+    border-radius: 9px;
+    background: #dcecf2;
+}
+
+.library-game-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.library-no-cover {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    font-size: 35px;
+}
+
+.library-game-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.library-game-info h3 {
+    color: #249fc8;
+    font-size: 16px;
+    margin: 3px 0 13px;
+}
+
+.library-game-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.library-game-meta strong {
+    display: block;
+    color: #355363;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.library-status {
+    color: #159dc8 !important;
+}
+
+.library-detail-button {
+    display: inline-block;
+    margin-top: 13px;
+    color: #169fc9;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.library-detail-button:hover {
+    color: #087ba2;
+}
+
+.library-empty {
+    text-align: center;
+    padding: 55px 15px;
+    color: #829eac;
+}
+
+.library-empty div {
+    font-size: 50px;
+}
+
+.library-empty h3 {
+    color: #269fca;
+}
+
+.library-empty p {
+    margin-bottom: 25px;
+}
+
+.library-pagination {
+    margin-top: 25px;
+}
+
+.library-footer {
+    text-align: center;
+    color: #8ba6b2;
+    font-size: 11px;
+    letter-spacing: 2px;
+    margin-top: 35px;
+}
+
+/* Wii Midnight */
+
+body.wii-body[data-theme="midnight"] .library-summary-card,
+body.wii-body[data-theme="midnight"] .library-content,
+body.wii-body[data-theme="midnight"] .library-game-card {
+    background: #1a3040;
+    border-color: #345366;
+}
+
+body.wii-body[data-theme="midnight"] .library-heading h1,
+body.wii-body[data-theme="midnight"] .library-section-heading h2,
+body.wii-body[data-theme="midnight"] .library-game-info h3 {
+    color: #55d4ff;
+}
+
+body.wii-body[data-theme="midnight"] .library-summary-card strong,
+body.wii-body[data-theme="midnight"] .library-game-meta strong {
+    color: #e4f5fc;
+}
+
+body.wii-body[data-theme="midnight"] .library-heading p,
+body.wii-body[data-theme="midnight"] .library-summary-card span,
+body.wii-body[data-theme="midnight"] .library-game-meta span,
+body.wii-body[data-theme="midnight"] .library-section-heading span {
+    color: #9ab9c9;
+}
+
+body.wii-body[data-theme="midnight"] .library-status {
+    color: #55d4ff !important;
+}
+
+body.wii-body[data-theme="midnight"] .library-empty h3 {
+    color: #55d4ff;
+}
+
+body.wii-body[data-theme="midnight"] .library-empty,
+body.wii-body[data-theme="midnight"] .library-footer {
+    color: #9ab9c9;
+}
+
+/* Responsive */
+
+@media (max-width: 750px) {
+    .library-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .library-content {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .library-header {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .library-heading {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    .library-game-card {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .library-game-cover {
+        width: 85px;
+        min-width: 85px;
+        height: 125px;
+    }
+
+    .library-game-meta {
+        grid-template-columns: 1fr;
+        gap: 7px;
+    }
+}
+
+
+/* =========================================
+   PERSONAL LIBRARY EDIT
+========================================= */
+
+.library-edit-page {
+    width: min(850px, 92%);
+    min-height: 100vh;
+    margin: auto;
+    padding: 30px 0;
+}
+
+.library-edit-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.library-edit-container {
+    padding: 30px 40px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, .65);
+    border: 1px solid #d2e6ed;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+}
+
+.library-edit-heading {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.library-edit-heading > div {
+    font-size: 40px;
+}
+
+.library-edit-heading h1 {
+    color: #26b9ed;
+    margin: 10px 0;
+}
+
+.library-edit-heading p {
+    color: #829eac;
+}
+
+.library-edit-game {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.library-edit-game img {
+    width: 115px;
+    height: 155px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid #b8e4f1;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .12);
+}
+
+.library-edit-game h2 {
+    color: #269fca;
+    font-size: 21px;
+    margin-top: 12px;
+}
+
+.library-edit-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.library-edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.library-edit-field label {
+    color: #527181;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.library-edit-field input,
+.library-edit-field select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #c6e0e9;
+    border-radius: 9px;
+    background: #fff;
+    color: #355363;
+    font-size: 14px;
+    outline: none;
+}
+
+.library-edit-field input:focus,
+.library-edit-field select:focus {
+    border-color: #26b9ed;
+    box-shadow: 0 0 0 3px rgba(38, 185, 237, .12);
+}
+
+.library-edit-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.library-edit-errors {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #e6a1a1;
+    border-radius: 10px;
+    background: #fff0f0;
+    color: #a52d2d;
+}
+
+.library-edit-footer {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #8ba6b2;
+}
+
+/* Wii Midnight */
+
+body.wii-body[data-theme="midnight"] .library-edit-container {
+    background: #1a3040;
+    border-color: #345366;
+}
+
+body.wii-body[data-theme="midnight"] .library-edit-heading h1,
+body.wii-body[data-theme="midnight"] .library-edit-game h2 {
+    color: #55d4ff;
+}
+
+body.wii-body[data-theme="midnight"] .library-edit-heading p,
+body.wii-body[data-theme="midnight"] .library-edit-field label {
+    color: #9ab9c9;
+}
+
+body.wii-body[data-theme="midnight"] .library-edit-field input,
+body.wii-body[data-theme="midnight"] .library-edit-field select {
+    background: #102331;
+    color: #e4f5fc;
+    border-color: #456477;
+}
+
+body.wii-body[data-theme="midnight"] .library-edit-footer {
+    color: #9ab9c9;
+}
+
+@media (max-width: 600px) {
+    .library-edit-container {
+        padding: 25px 18px;
+    }
+
+    .library-edit-form {
+        grid-template-columns: 1fr;
+    }
+
+    .library-edit-actions {
+        flex-direction: column;
+    }
+
+    .library-edit-actions > * {
+        text-align: center;
+    }
+}
+
+.library-card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* REMOVE FROM PERSONAL LIBRARY */
+
+/* REMOVE FROM PERSONAL LIBRARY */
+
+.library-remove-button {
+    padding: 4px 9px;
+    border-radius: 15px;
+    border: 1px solid #e47b7b;
+    background: transparent;
+    color: #e47b7b;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.2;
+}
+
+.library-remove-button:hover {
+    background: #e47b7b;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.library-card-actions form {
+    display: inline-block;
+    margin: 0;
+}
+
+.library-button {
+    text-decoration: none;
+}
+
+
+/* ==================================================
+   GAME DETAILS - UPDATED RESPONSIVE HORIZONTAL LAYOUT
+   Cover on the left, game information on the right.
+   This block intentionally comes last to override
+   the previous centered details layout safely.
+================================================== */
+
+.wii-detail-content {
+    text-align: left;
+}
+
+/* Main two-column layout */
+.wii-detail-main {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    align-items: start;
+    gap: 28px;
+    margin-top: 10px;
+}
+
+.wii-detail-main.no-cover {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* Cover */
+.wii-detail-cover {
+    width: 100%;
+    min-width: 0;
+}
+
+.wii-detail-cover img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+    object-fit: contain;
+    object-position: top center;
+    border: 2px solid #c9eaf5;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .2);
+}
+
+/* Information column */
+.wii-detail-side {
+    min-width: 0;
+}
+
+.wii-detail-title {
+    margin: 0 0 22px;
+    color: #279fc8;
+    font-size: 25px;
+    line-height: 1.3;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+/* Keep information cards readable inside the right column */
+.wii-detail-info {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Description remains full-width below the cover and information */
+.wii-detail-description {
+    width: 100%;
+    margin-top: 24px;
+}
+
+/* Midnight theme */
+body.wii-body[data-theme="midnight"] .wii-detail-title {
+    color: #61d4fa;
+}
+
+/* Tablet and mobile layout */
+@media (max-width: 650px) {
+    .wii-detail-main {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 20px;
+    }
+
+    .wii-detail-cover {
+        display: flex;
+        justify-content: center;
+    }
+
+    .wii-detail-cover img {
+        width: min(190px, 70%);
+        max-height: 280px;
+    }
+
+    .wii-detail-title {
+        margin-top: 0;
+        text-align: center;
+    }
+
+    .wii-detail-info {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* Very narrow screens */
+@media (max-width: 380px) {
+    .wii-detail-cover img {
+        width: min(170px, 75%);
+    }
+}
+
+
+/* =========================================
+   WII GAME OPENING - BLURRED COVER BACKGROUND
+========================================= */
+
+.wii-opening-panel {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* Background cover */
+.wii-opening-backdrop {
+    position: absolute;
+    inset: -25px;
+    z-index: 0;
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    filter: blur(20px);
+    opacity: 0.38;
+
+    transform: scale(1.08);
+    pointer-events: none;
+}
+
+/* Lapisan agar konten tetap terbaca */
+.wii-opening-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.78),
+        rgba(225, 243, 250, 0.88)
+    );
+
+    pointer-events: none;
+}
+
+/* Konten popup tetap di atas background */
+.wii-opening-panel > :not(.wii-opening-backdrop) {
+    position: relative;
+    z-index: 1;
+}
+
+/* Midnight theme */
+body.wii-body[data-theme="midnight"] .wii-opening-panel::before {
+    background: linear-gradient(
+        135deg,
+        rgba(8, 20, 32, 0.82),
+        rgba(15, 39, 55, 0.90)
+    );
+}
+
+body.wii-body[data-theme="midnight"] .wii-opening-backdrop {
+    opacity: 0.48;
+}
+
+
+/* =================================
+   LOGOUT BUTTON
+================================= */
+
+.logout-form {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+}
+
+.logout-button {
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.25s ease;
+}
+
+.logout-button:hover {
+    background: #ffe5e5;
+    border-color: #e57373;
+    color: #c62828;
+    transform: translateY(-2px);
+}
+
+.logout-button:active {
+    transform: scale(0.96);
+}
+
+
+/* ========================================
+   GAME DETAILS - ADAPTIVE COVER LAYOUT
+======================================== */
+
+/* Layout utama */
+.wii-detail-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 28px;
+}
+
+/* Container cover */
+.wii-detail-cover {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
+/* Gambar cover */
+.wii-detail-cover img {
+    display: block;
+    width: auto;
+    height: auto;
+
+    max-width: 100%;
+    max-height: 380px;
+
+    object-fit: contain;
+    object-position: center;
+
+    border-radius: 12px;
+    border: 2px solid #b9eaff;
+
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* Informasi game */
+.wii-detail-side {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Judul game */
+.wii-detail-title {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+/* Grid informasi */
+.wii-detail-info {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+}
+
+/* Item informasi */
+.wii-detail-item {
+    min-width: 0;
+}
+
+/* Responsif untuk HP */
+@media (max-width: 600px) {
+
+    .wii-detail-cover img {
+        max-height: 320px;
+    }
+
+    .wii-detail-info {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+/* ==================================================
+   WII MENU - COMPACT SEARCH + ORIGINAL CHANNEL SIZE
+   Consolidated desktop layout; mobile keeps natural scroll.
+================================================== */
+
+/* Search area: compact, centered, and independent of channel sizing. */
+.wii-search-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin: 16px auto 0;
+    padding: 0;
+}
+
+.wii-search-wrapper form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: min(100%, 650px);
+    margin: 0 auto;
+}
+
+.wii-search-wrapper input {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 40px;
+    padding: 0 15px;
+    color: #eaf7fc;
+    background: #142937;
+    border: 1px solid #55c8ee;
+    border-radius: 24px;
+    outline: none;
+    font: inherit;
+    font-size: 13px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.wii-search-wrapper input::placeholder {
+    color: #9ab9c9;
+}
+
+.wii-search-wrapper input:focus {
+    border-color: #8de2ff;
+    box-shadow: 0 0 0 3px rgba(85, 200, 238, .16);
+}
+
+.wii-search-wrapper button {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 0 18px;
+    color: #8de2ff;
+    background: linear-gradient(145deg, #304b5d, #1b3040);
+    border: 1px solid #55c8ee;
+    border-radius: 24px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s ease, transform .2s ease;
+}
+
+.wii-search-wrapper button:hover {
+    background: #3b6077;
+    transform: translateY(-1px);
+}
+
+/* Classic theme search controls. */
+body.wii-body[data-theme="classic"] .wii-search-wrapper input {
+    color: #526c79;
+    background: rgba(255, 255, 255, .88);
+    border-color: #72cce9;
+}
+
+body.wii-body[data-theme="classic"] .wii-search-wrapper input::placeholder {
+    color: #8ba2ad;
+}
+
+body.wii-body[data-theme="classic"] .wii-search-wrapper button {
+    color: #168fbd;
+    background: linear-gradient(145deg, #fff, #dff4fc);
+    border-color: #8bd8f0;
+}
+
+body.wii-body[data-theme="classic"] .wii-search-wrapper button:hover {
+    background: linear-gradient(145deg, #fff, #c9efff);
+}
+
+/* Main catalog layout. Do not force channel height or image ratio. */
+@media (min-width: 769px) {
+    .wii-screen {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+        padding: 24px 20px 205px;
+    }
+
+    .wii-top {
+        margin-bottom: 0;
+    }
+
+    .wii-search-wrapper {
+        margin-top: 14px;
+    }
+
+    .wii-menu {
+        position: relative;
+    }
+
+    .channel-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-auto-rows: 150px;
+        gap: 12px;
+        margin-top: 26px;
+        height: auto;
+        max-height: none;
+    }
+
+    .channel {
+        height: 150px;
+        min-height: 150px;
+        max-height: none;
+    }
+
+    .channel-preview {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+    }
+
+    .channel-preview img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .page-arrows {
+        top: 50%;
+        margin: 0;
+    }
+}
+
+/* Shorter laptop displays: preserve the original card height.
+   Allow the page to scroll rather than squash the game artwork. */
+@media (min-width: 769px) and (max-height: 760px) {
+    .wii-screen {
+        padding-top: 18px;
+    }
+
+    .channel-grid {
+        margin-top: 20px;
+        gap: 10px;
+    }
+}
+
+/* Tablet layout. */
+@media (max-width: 768px) {
+    .wii-screen {
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+        padding: 25px 16px 165px;
+    }
+
+    .wii-search-wrapper {
+        margin-top: 14px;
+    }
+
+    .wii-search-wrapper form {
+        width: 100%;
+    }
+
+    .channel-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-auto-rows: 120px;
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+    .channel {
+        height: 120px;
+        min-height: 120px;
+    }
+
+    .page-arrows {
+        right: -8px;
+        left: -8px;
+    }
+}
+
+/* Mobile layout. */
+@media (max-width: 600px) {
+    .wii-search-wrapper form {
+        gap: 6px;
+    }
+
+    .wii-search-wrapper input {
+        height: 38px;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    .wii-search-wrapper button {
+        min-height: 38px;
+        padding: 0 13px;
+        font-size: 12px;
+    }
+
+    .channel-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: 115px;
+        gap: 9px;
+    }
+
+    .channel {
+        height: 115px;
+        min-height: 115px;
+    }
+}
+
+@media (max-width: 380px) {
+    .wii-search-wrapper button {
+        padding: 0 10px;
+    }
+
+    .channel-grid {
+        gap: 8px;
+    }
+}
+
+/* Respect reduced-motion preferences for animated UI. */
+@media (prefers-reduced-motion: reduce) {
+    .channel,
+    .channel-preview img,
+    .channel-gloss,
+    .page-arrow,
+    .wii-search-wrapper button {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ==================================================
+   FINAL FIX — LOCK WII MENU TO THE VIEWPORT
+   Prevents the extra page height caused by 100vh
+   plus bottom padding. The dock stays fixed and the
+   channel grid uses only the space above it.
+================================================== */
+@media (min-width: 769px) {
+    html,
+    body.wii-body {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden !important;
+    }
+
+    body.wii-body {
+        box-sizing: border-box;
+    }
+
+    body.wii-body .wii-screen {
+        width: 100%;
+        height: 100vh;
+        height: 100svh;
+        min-height: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        padding: 18px 20px 190px;
+        margin: 0 auto;
+    }
+
+    body.wii-body .wii-top {
+        flex: 0 0 auto;
+        min-height: 34px;
+        margin: 0;
+    }
+
+    body.wii-body .wii-search-wrapper {
+        flex: 0 0 auto;
+        margin-top: 12px;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    body.wii-body .wii-menu {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    body.wii-body .channel-grid {
+        flex: 0 1 auto;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-rows: repeat(3, minmax(0, 1fr));
+        grid-auto-rows: unset;
+        gap: 10px 12px;
+        width: 100%;
+        height: min(100%, 470px);
+        max-height: 470px;
+        min-height: 0;
+        margin: 18px 0 0;
+        overflow: hidden;
+    }
+
+    body.wii-body .channel {
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        max-height: none;
+        overflow: hidden;
+    }
+
+    body.wii-body .channel-preview {
+        flex: 1 1 auto;
+        min-height: 0;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    body.wii-body .channel-preview img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    body.wii-body .page-arrows {
+        flex: 0 0 auto;
+        margin-top: 8px;
+        margin-bottom: 0;
+    }
+
+    body.wii-body .wii-dock {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 190px;
+        min-height: 190px;
+        box-sizing: border-box;
+        z-index: 100;
+    }
+}
+
+/* Compact laptop-height displays: shrink channel rows, not the artwork. */
+@media (min-width: 769px) and (max-height: 760px) {
+    body.wii-body .wii-screen {
+        padding-top: 12px;
+        padding-bottom: 170px;
+    }
+
+    body.wii-body .wii-dock {
+        height: 170px;
+        min-height: 170px;
+    }
+
+    body.wii-body .channel-grid {
+        height: min(100%, 390px);
+        max-height: 390px;
+        gap: 8px 10px;
+        margin-top: 12px;
+    }
+}
+
+/* Narrow screens retain normal scrolling and the mobile layout. */
+@media (max-width: 768px) {
+    html,
+    body.wii-body {
+        height: auto;
+        min-height: 100%;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+}
+
+/* =====================================
+   RAWG API CATALOG BUTTON
+===================================== */
+
+.wii-api-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    padding: 11px 17px;
+
+    border: 1px solid #42cfff;
+    border-radius: 30px;
+
+    background: rgba(25, 190, 240, 0.12);
+    color: #55d8ff;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition: all 0.25s ease;
+}
+
+.wii-api-button:hover {
+    background: #35caff;
+    color: #102331;
+
+    box-shadow: 0 0 15px rgba(53, 202, 255, 0.4);
+
+    transform: translateY(-2px);
+}
+
+.wii-api-button:active {
+    transform: scale(0.97);
+}
+
+
+/* Wii Menu Pagination */
+
+.page-arrows {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin: 12px auto 18px;
+    position: relative;
+    z-index: 5;
+}
+
+.page-arrow {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 50%;
+    border: 1px solid #48d8ff;
+
+    color: #48d8ff;
+    background: rgba(20, 45, 60, 0.85);
+
+    font-size: 17px;
+    text-decoration: none;
+
+    transition: 0.2s ease;
+}
+
+.page-arrow:hover:not(.disabled) {
+    background: #48d8ff;
+    color: #102432;
+    transform: scale(1.1);
+}
+
+.page-arrow.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.page-indicator {
+    color: #48d8ff;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   FINAL PAGINATION FIX
+   Keep the Wii arrows outside the game tiles without clipping.
+   This block intentionally comes LAST to override older rules.
+========================================================= */
+@media (min-width: 769px) {
+    /* The arrows extend beyond the menu's content box. */
+    html body.wii-body .wii-screen {
+        overflow: visible !important;
+    }
+
+    html body.wii-body .wii-menu {
+        position: relative !important;
+        overflow: visible !important;
+        isolation: auto;
+    }
+
+    html body.wii-body .channel-grid {
+        overflow: visible !important;
+    }
+
+    html body.wii-body .page-arrows {
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        right: auto !important;
+        bottom: auto !important;
+        width: calc(100% + 104px) !important;
+        max-width: calc(100vw - 32px) !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 0 !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 1000 !important;
+        pointer-events: none !important;
+    }
+
+    html body.wii-body .page-arrow {
+        position: relative;
+        z-index: 1001;
+        flex: 0 0 42px;
+        width: 42px !important;
+        height: 52px !important;
+        min-width: 42px;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto !important;
+    }
+}
+
+/* On small screens, keep pagination in normal document flow
+   so it never covers the channel tiles or gets cut off. */
+@media (max-width: 768px) {
+    html body.wii-body .wii-screen,
+    html body.wii-body .wii-menu {
+        overflow: visible !important;
+    }
+
+    html body.wii-body .page-arrows {
+        position: relative !important;
+        inset: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 14px auto 18px !important;
+        padding: 0 4px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 16px !important;
+        transform: none !important;
+        z-index: 5 !important;
+    }
+}
+
+
+/* =========================================================
+   PAGINATION COLORS — LIGHT THEME
+   The later Wii pagination styles were assigning a dark
+   background unconditionally. Keep that palette only for
+   Midnight; use the light Wii palette for every other theme.
+========================================================= */
+body.wii-body:not([data-theme="midnight"]) .page-arrow {
+    color: #269fca !important;
+    background: linear-gradient(145deg, #ffffff 0%, #f5fcff 50%, #dff4fc 100%) !important;
+    border: 1px solid #bfe8f6 !important;
+    box-shadow: 0 3px 7px rgba(0, 0, 0, .10),
+                inset 0 2px 3px rgba(255, 255, 255, .95) !important;
+}
+
+body.wii-body:not([data-theme="midnight"]) .page-arrow:hover:not(.disabled) {
+    color: #168fbd !important;
+    background: linear-gradient(145deg, #ffffff, #d9f4ff) !important;
+    border-color: #8bd8f0 !important;
+    box-shadow: 0 0 12px rgba(50, 180, 225, .30),
+                inset 0 2px 4px #ffffff !important;
+}
+
+body.wii-body:not([data-theme="midnight"]) .page-arrow.disabled {
+    color: #269fca !important;
+    background: linear-gradient(145deg, #ffffff, #edf8fc) !important;
+    opacity: .35;
+}
+
+/* Preserve the dark palette only in Midnight mode. */
+body.wii-body[data-theme="midnight"] .page-arrow {
+    color: #55d4ff;
+    background: linear-gradient(90deg, #263b4b, #1b2d3a);
+    border-color: #45677b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+}
+
+
+/* =========================================================
+   GLOBAL SCROLL RESTORE — NON-MENU PAGES
+   The desktop viewport lock is only intended for the Wii
+   menu. Details, profile, library and other pages must scroll.
+   The Wii menu is identified by its .wii-menu element.
+========================================================= */
+@media (min-width: 769px) {
+    html:has(body.wii-body:not(:has(.wii-menu))) {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
+    body.wii-body:not(:has(.wii-menu)) {
+        height: auto !important;
+        min-height: 100vh !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
+    body.wii-body:not(:has(.wii-menu)) .wii-form-page {
+        min-height: 100vh;
+        height: auto !important;
+        overflow: visible !important;
+    }
+}
+
+
+/* =========================================================
+   DEFINITIVE SCROLL FIX
+   The old desktop Wii-menu rule locked BOTH html and body.
+   Restore document scrolling globally, then lock only the
+   actual Wii menu page (identified by .wii-menu).
+========================================================= */
+
+/* Never lock the document element: it owns page scrolling. */
+@media (min-width: 769px) {
+    html {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
+    /* Detail, profile, library, catalog, and other pages. */
+    body.wii-body:not(:has(.wii-menu)) {
+        height: auto !important;
+        min-height: 100vh !important;
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+    }
+
+    body.wii-body:not(:has(.wii-menu)) .wii-form-page,
+    body.wii-body:not(:has(.wii-menu)) .wii-form-container {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    /* Only the Wii menu keeps the one-screen layout. */
+    body.wii-body:has(.wii-menu) {
+        height: 100vh !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+    }
+}
+
+/* Posisi cover dan judul di tengah halaman Edit My Game */
+.library-edit-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+}
+
+.library-edit-game img {
+    display: block;
+    width: 115px;
+    height: 155px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 12px;
+    margin: 0 auto 16px;
+}
+
+.library-edit-game h2 {
+    text-align: center;
+    width: 100%;
+    margin: 0 auto 24px;
+}
+
+.library-edit-game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+.library-edit-game img {
+    display: block;
+    width: 115px;
+    height: 155px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 12px;
+    margin: 0 auto 16px;
+}
+
+.library-edit-game h2 {
+    text-align: center;
+    width: 100%;
+    margin: 0 auto 24px;
+}
+
+.no-cover-placeholder {
+    width: 115px;
+    height: 155px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid #527083;
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
