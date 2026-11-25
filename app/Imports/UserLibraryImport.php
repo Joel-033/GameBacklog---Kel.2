@@ -3,9 +3,11 @@
 namespace App\Imports;
 
 use App\Models\Game;
+use App\Models\Genre;
 use App\Models\Platform;
 use App\Models\UserGame;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -18,7 +20,7 @@ class UserLibraryImport implements ToCollection, WithHeadingRow
         $this->userId = $userId;
     }
 
-   public function collection(Collection $rows): void
+    public function collection(Collection $rows): void
     {
         $validStatuses = ['Plan to Play', 'Backlog', 'Playing', 'Completed', 'Dropped'];
         $validPriorities = ['Low', 'Medium', 'High'];
@@ -29,22 +31,33 @@ class UserLibraryImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            // Cari game di katalog utama (lewati jika judul tidak ada di katalog)
+            // Cari game di katalog utama; jika belum ada, otomatis buat baru & ambil cover dari RAWG API
             $game = Game::where('title', 'LIKE', $title)->first();
             if (!$game) {
-                continue;
+                $defaultGenre = Genre::firstOrCreate(['name' => 'General']);
+                $coverImage = $this->fetchCoverFromRawg($title);
+
+                $game = Game::create([
+                    'title'        => $title,
+                    'genre_id'     => $defaultGenre->id,
+                    'developer'    => '-',
+                    'publisher'    => '-',
+                    'release_date' => now()->toDateString(),
+                    'cover_image'  => $coverImage,
+                ]);
             }
 
             // Validasi Status (default: Backlog)
             $rawStatus = trim((string) ($row['status'] ?? 'Backlog'));
             $status = in_array($rawStatus, $validStatuses, true) ? $rawStatus : 'Backlog';
 
-            // Cari Platform jika diisi
+            // Cari atau buat Platform jika diisi (misalnya Android / iOS)
             $rawPlatform = trim((string) ($row['platform'] ?? ''));
             $platformId = null;
             if ($rawPlatform !== '' && $rawPlatform !== '-') {
-                $platform = Platform::where('name', 'LIKE', $rawPlatform)->first();
-                $platformId = $platform?->id;
+                $platform = Platform::where('name', 'LIKE', $rawPlatform)->first()
+                    ?? Platform::create(['name' => $rawPlatform]);
+                $platformId = $platform->id;
             }
 
             // Playtime (angka jam)
@@ -69,5 +82,30 @@ class UserLibraryImport implements ToCollection, WithHeadingRow
                 ]
             );
         }
+    }
+
+    private function fetchCoverFromRawg(string $title): ?string
+    {
+        $apiKey = env('RAWG_API_KEY') ?: config('services.rawg.key');
+
+        if (!$apiKey) {
+            return null;
+        }
+
+        try {
+            $response = Http::timeout(5)->get('https://api.rawg.io/api/games', [
+                'key'       => $apiKey,
+                'search'    => $title,
+                'page_size' => 1,
+            ]);
+
+            if ($response->successful()) {
+                return $response->json('results.0.background_image');
+            }
+        } catch (\Exception $e) {
+            // Tetap lanjut import jika API lambat/gagal
+        }
+
+        return null;
     }
 }
