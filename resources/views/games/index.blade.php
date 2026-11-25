@@ -194,12 +194,23 @@
 
         <div class="wii-top-actions">
 
-            {{-- Add Game: Admin Only --}}
+{{-- Add Game, Export & Import: Admin Only --}}
             @if (auth()->user()->role === 'admin')
                 <a href="{{ route('games.create') }}"
                    class="wii-menu-button add-game">
                     + Add Game
                 </a>
+
+                <a href="{{ route('games.export') }}"
+                   class="wii-menu-button export-button">
+                    📥 Export Excel
+                </a>
+
+                <button type="button"
+                        class="wii-menu-button import-button"
+                        onclick="document.getElementById('wii-import-modal').classList.add('active')">
+                    📤 Import Excel
+                </button>
             @endif
 
             {{-- Refresh --}}
@@ -311,6 +322,39 @@
 
 
     {{-- CHANNEL MENU --}}
+    @if (session('success'))
+        <div class="wii-search-result" style="color: #65ff9f; font-weight: bold;">
+            ✓ {{ session('success') }}
+        </div>
+    @endif
+
+    @if ($errors->has('file'))
+        <div class="wii-search-result" style="color: #ff7b7b; font-weight: bold;">
+            ✕ {{ $errors->first('file') }}
+        </div>
+    @endif
+
+    @if (auth()->user()->role === 'admin')
+        <div class="wii-opening-overlay" id="wii-import-modal"
+             onclick="if(event.target === this) this.classList.remove('active')">
+            <div class="wii-opening-panel" style="padding: 28px; max-width: 460px;">
+                <div class="wii-opening-header">IMPORT KATALOG (ADMIN)</div>
+                <h2 class="wii-opening-title" style="margin-bottom: 10px;">Upload Katalog Game</h2>
+                <p style="font-size: 13px; color: #a8d8ef; margin-bottom: 18px; line-height: 1.5;">
+                    Kolom: <code>Judul Game</code>, <code>Genre</code>, <code>Platform</code>, <code>Developer</code>, <code>Publisher</code>, <code>Tanggal Rilis</code>, <code>Deskripsi</code>.
+                </p>
+                <form action="{{ route('games.import') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <input type="file" name="file" accept=".xlsx,.xls,.csv" required class="wii-search-input" style="width: 100%; margin-bottom: 20px; border-radius: 14px;">
+                    <div class="wii-opening-actions">
+                        <button type="button" class="wii-action-button" onclick="document.getElementById('wii-import-modal').classList.remove('active')">Cancel</button>
+                        <button type="submit" class="wii-action-button primary">📤 Upload & Import</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
+
     <section class="wii-menu">
 
         <div class="channel-grid">
@@ -781,7 +825,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
-
     // =================================
     // 10. DELETE GAME CONFIRMATION
     // =================================
@@ -799,10 +842,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 event.preventDefault();
 
             }
-
+            
         });
 
     }
+
+    // =================================
+    // 11. WII REAL-TIME LOCAL CLOCK
+    // =================================
+
+    const timeEl = document.querySelector('.wii-time');
+    const dateEl = document.querySelector('.wii-date');
+
+    function updateWiiClock() {
+        const now = new Date(); // Otomatis membaca jam & zona waktu lokasi perangkat user
+
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+
+        hours = hours % 12;
+        hours = hours ? hours : 12; // Jam 0 menjadi 12
+        const formattedHours = String(hours).padStart(2, '0');
+
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const dayName = days[now.getDay()];
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+
+        if (timeEl) {
+            timeEl.innerHTML = `${formattedHours}:${minutes}\n            <small>${ampm}</small>`;
+        }
+
+        if (dateEl) {
+            dateEl.textContent = `${dayName} ${day}/${month}`;
+        }
+    }
+
+    updateWiiClock();
+    setInterval(updateWiiClock, 1000);
 
 });
 

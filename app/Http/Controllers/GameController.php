@@ -4,6 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\UserGame;
 use App\Models\Game;
+use Illuminate\Support\Facades\Http;
+use App\Exports\GamesExport;
+use App\Imports\GamesImport;
+use App\Exports\UserLibraryExport;
+use App\Imports\UserLibraryImport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Genre;
 use App\Models\Platform;
 use Illuminate\Http\Request;
@@ -25,6 +31,28 @@ class GameController extends Controller
             ->orderBy('title')
             ->paginate(12)
             ->withQueryString();
+
+            // Otomatis lengkapi cover_image dari RAWG API untuk game di halaman ini yang belum punya cover
+        $apiKey = env('RAWG_API_KEY') ?: config('services.rawg.key');
+        if ($apiKey) {
+            foreach ($games as $gameItem) {
+                if (empty($gameItem->cover_image)) {
+                    try {
+                        $res = Http::timeout(4)->get('https://api.rawg.io/api/games', [
+                            'key'       => $apiKey,
+                            'search'    => $gameItem->title,
+                            'page_size' => 1,
+                        ]);
+
+                        if ($res->successful() && ($img = $res->json('results.0.background_image'))) {
+                            $gameItem->update(['cover_image' => $img]);
+                        }
+                    } catch (\Exception $e) {
+                        // Abaikan jika API timeout
+                    }
+                }
+            }
+        }
 
         return view('games.index', compact('games'));
     }
@@ -289,6 +317,46 @@ class GameController extends Controller
         // 6. Kembali ke halaman daftar game
         return redirect()->route('games.index')
             ->with('success', 'Game berhasil dihapus!');
+    }
+
+public function exportExcel()
+    {
+        return Excel::download(new GamesExport, 'katalog-game.xlsx');
+    }
+
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        Excel::import(new GamesImport, $request->file('file'));
+
+        return redirect()->route('games.index')
+            ->with('success', 'Data katalog game berhasil diimpor dari Excel!');
+    }
+
+    public function exportLibrary(Request $request)
+    {
+        return Excel::download(
+            new UserLibraryExport($request->user()->id),
+            'my-personal-library.xlsx'
+        );
+    }
+
+    public function importLibrary(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        Excel::import(
+            new UserLibraryImport($request->user()->id),
+            $request->file('file')
+        );
+
+        return redirect()->route('games.library')
+            ->with('success', 'Koleksi Personal Library berhasil diimpor dari Excel!');
     }
 
 }

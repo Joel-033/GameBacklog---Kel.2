@@ -68,6 +68,13 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('admin')->group(function () {
 
+        // Export & Import katalog game (Admin Only)
+        Route::get('/games/export', [GameController::class, 'exportExcel'])
+            ->name('games.export');
+
+        Route::post('/games/import', [GameController::class, 'importExcel'])
+            ->name('games.import');
+
         // Menampilkan form tambah game
         Route::get('/games/create', [GameController::class, 'create'])
             ->name('games.create');
@@ -131,6 +138,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/my-library/{id}', [GameController::class, 'removeFromLibrary'])
         ->whereNumber('id')
         ->name('games.library.remove');
+
+    // Export & Import Personal Library (User & Admin)
+    Route::get('/my-library/export', [GameController::class, 'exportLibrary'])
+        ->name('games.library.export');
+
+    Route::post('/my-library/import', [GameController::class, 'importLibrary'])
+        ->name('games.library.import');
 
     Route::post('/rawg-game/{id}/add',
     [RawgController::class, 'addToMyGames']
