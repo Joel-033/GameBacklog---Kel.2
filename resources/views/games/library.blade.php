@@ -55,9 +55,30 @@
             </div>
         @endif
 
-        <div class="library-section-heading">
-            <h2>My Games</h2>
-            <span>{{ $userGames->total() }} Games</span>
+@if ($errors->has('file'))
+            <div class="wii-success-message" style="background: rgba(255, 80, 80, 0.2); border-color: #ff7b7b; color: #ffb3b3;">
+                ✕ {{ $errors->first('file') }}
+            </div>
+        @endif
+
+        <div class="library-section-heading" style="flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h2>My Games</h2>
+                <span>{{ $userGames->total() }} Games</span>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="{{ route('games.library.export') }}" class="wii-back-button">
+                    📥 Export Library
+                </a>
+
+                <button type="button"
+                        class="wii-back-button"
+                        style="cursor: pointer;"
+                        onclick="document.getElementById('library-import-modal').classList.add('active')">
+                    📤 Import Library
+                </button>
+            </div>
         </div>
 
         @if ($userGames->isEmpty())
@@ -216,6 +237,33 @@
         GAMEBACKLOG · MY PERSONAL COLLECTION
     </footer>
 
+</div>
+
+<!-- Modal Import Personal Library -->
+<div class="wii-opening-overlay" id="library-import-modal"
+     onclick="if(event.target === this) this.classList.remove('active')">
+    <div class="wii-opening-panel" style="padding: 28px; max-width: 460px;">
+        <div class="wii-opening-header">IMPORT PERSONAL LIBRARY</div>
+        <h2 class="wii-opening-title" style="margin-bottom: 10px;">Upload Koleksi Game</h2>
+        <p style="font-size: 13px; color: #a8d8ef; margin-bottom: 18px; line-height: 1.5;">
+            Gunakan template dari <strong>Export Library</strong>.<br>
+            Kolom: <code>Judul Game</code> (sesuai katalog), <code>Status</code> (Plan to Play / Backlog / Playing / Completed / Dropped), <code>Platform</code>, <code>Playtime (Jam)</code>, <code>Priority</code> (Low / Medium / High).
+        </p>
+        <form action="{{ route('games.library.import') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+                   style="width: 100%; padding: 10px; margin-bottom: 20px; border-radius: 12px; border: 1px solid #58cfff; background: rgba(15,35,50,0.9); color: #fff;">
+            <div class="wii-opening-actions">
+                <button type="button" class="wii-action-button"
+                        onclick="document.getElementById('library-import-modal').classList.remove('active')">
+                    Cancel
+                </button>
+                <button type="submit" class="wii-action-button primary">
+                    📤 Upload & Import
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Theme Toggle -->
