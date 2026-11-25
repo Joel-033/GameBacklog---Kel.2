@@ -50,6 +50,11 @@ Route::middleware('auth')->group(function () {
         ->middleware('admin')
         ->name('dashboard.activity-data');
 
+    // Rekomendasi Game Personal (API Visual)
+    Route::get('/recommendations', function () {
+        return view('recommendations');
+    })->name('recommendations');
+
 
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])
@@ -150,7 +155,7 @@ Route::middleware('auth')->group(function () {
         ->name('games.library.import');
 
     Route::post('/rawg-game/{id}/add',
-    [RawgController::class, 'addToMyGames']
+        [RawgController::class, 'addToMyGames']
     )->name('rawg.add');
 
 });
@@ -168,7 +173,3 @@ Route::post('/rawg-game/{id}/add', [
 ])
 ->middleware('auth')
 ->name('rawg.add');
-
-Route::post('/rawg-game/{id}/add', [RawgController::class, 'addToMyGames'])
-    ->middleware('auth')
-    ->name('rawg.add');

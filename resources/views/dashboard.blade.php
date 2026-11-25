@@ -99,6 +99,24 @@
 
                 </div>
 
+
+                <a href="{{ route('recommendations') }}"
+                   class="dashboard-menu-card"
+                   style="grid-column: 1 / -1;">
+
+                    <div class="dashboard-menu-icon">
+                        ✨
+                    </div>
+
+                    <div>
+                        <h3>Recommended Games</h3>
+                        <p>Personalized picks based on your play history</p>
+                    </div>
+
+                    <span class="dashboard-arrow">›</span>
+
+                </a>
+
             </div>
 
 
@@ -138,7 +156,7 @@
 
                     <div class="dashboard-section-heading">
                         <h3>Admin Analytics</h3>
-                        <span>CATALOG &amp; POPULARITY</span>
+                        <span>CATALOG & POPULARITY</span>
                     </div>
 
                     <!-- Card 1: Distribusi Game per Genre -->
