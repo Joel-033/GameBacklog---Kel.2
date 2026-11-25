@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\UserGame;
 use App\Models\Game;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Exports\GamesExport;
 use App\Imports\GamesImport;
@@ -18,21 +20,70 @@ use Illuminate\Support\Facades\Storage;
 class GameController extends Controller
 {
     /**
-     * Display a listing of the resource.
+- Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $search = $request->query('search');
+        $search     = $request->query('search');
+        $genreId    = $request->query('genre_id');
+        $platformId = $request->query('platform_id');
+        $sort       = $request->query('sort', 'title_asc');
 
-        $games = Game::query()
-            ->when($search, function ($query, $search) {
-                $query->where('title', 'LIKE', "%{$search}%");
+        $query = Game::query()
+            ->with(['genre', 'platforms'])
+            ->when($search, function ($q, $search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('title', 'LIKE', "%{$search}%")
+                        ->orWhere('developer', 'LIKE', "%{$search}%")
+                        ->orWhere('publisher', 'LIKE', "%{$search}%");
+                });
             })
-            ->orderBy('title')
+            ->when($genreId, function ($q, $genreId) {
+                $q->where('genre_id', $genreId);
+            })
+            ->when($platformId, function ($q, $platformId) {
+                $q->whereHas('platforms', function ($sub) use ($platformId) {
+                    $sub->where('platforms.id', $platformId);
+                });
+            })
+            ->when($sort, function ($q, $sort) {
+                match ($sort) {
+                    'title_desc' => $q->orderBy('title', 'desc'),
+                    'newest', 'newest_release' => $q->orderByDesc('release_date')->orderByDesc('id'),
+                    'oldest'     => $q->orderBy('release_date')->orderBy('id'),
+                    'latest', 'latest_id' => $q->orderByDesc('id'),
+                    default      => $q->orderBy('title', 'asc'),
+                };
+            });
+
+        // Endpoint ringan untuk live search dropdown saat mengetik
+        if ($request->wantsJson() || $request->boolean('ajax')) {
+            $results = (clone $query)
+                ->limit(6)
+                ->get()
+                ->map(function ($g) {
+                    $cover = trim((string) ($g->cover_image ?? ''));
+                    if ($cover !== '' && !\Illuminate\Support\Str::startsWith($cover, ['http://', 'https://'])) {
+                        $cover = asset('storage/' . ltrim($cover, '/'));
+                    }
+                    return [
+                        'id'        => $g->id,
+                        'title'     => $g->title,
+                        'genre'     => optional($g->genre)->name ?? 'Game',
+                        'year'      => $g->release_date ? \Carbon\Carbon::parse($g->release_date)->format('Y') : '',
+                        'cover_url' => $cover,
+                        'show_url'  => route('games.show', $g->id),
+                    ];
+                });
+
+            return response()->json(['games' => $results]);
+        }
+
+        $games = $query
             ->paginate(12)
             ->withQueryString();
 
-            // Otomatis lengkapi cover_image dari RAWG API untuk game di halaman ini yang belum punya cover
+        // Otomatis lengkapi cover_image dari RAWG API untuk game di halaman ini yang belum punya cover
         $apiKey = env('RAWG_API_KEY') ?: config('services.rawg.key');
         if ($apiKey) {
             foreach ($games as $gameItem) {
@@ -54,13 +105,15 @@ class GameController extends Controller
             }
         }
 
-        return view('games.index', compact('games'));
+        $genres = Genre::orderBy('name')->get();
+        $platforms = Platform::orderBy('name')->get();
+
+        return view('games.index', compact('games', 'genres', 'platforms'));
     }
 
     /**
-     * Show the form for creating a new resource.
+- Show the form for creating a new resource.
      */
-
     public function create()
     {
         $genres = Genre::all();
@@ -69,24 +122,22 @@ class GameController extends Controller
         return view('games.create', compact('genres', 'platforms'));
     }
 
-
     /**
-     * Store a newly created resource in storage.
+- Store a newly created resource in storage.
      */
-
     public function store(Request $request)
     {
         // Validasi data yang dikirim dari form
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'genre_id' => 'required|exists:genres,id',
-            'developer' => 'required|string|max:255',
-            'publisher' => 'required|string|max:255',
+            'title'        => 'required|string|max:255',
+            'genre_id'     => 'required|exists:genres,id',
+            'developer'    => 'required|string|max:255',
+            'publisher'    => 'required|string|max:255',
             'release_date' => 'required|date',
-            'platforms' => 'required|array|min:1',
-            'platforms.*' => 'exists:platforms,id',
-            'description' => 'nullable|string',
-            'cover_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'platforms'    => 'required|array|min:1',
+            'platforms.*'  => 'exists:platforms,id',
+            'description'  => 'nullable|string',
+            'cover_image'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         // Mengambil ID platform yang dipilih
@@ -112,9 +163,8 @@ class GameController extends Controller
             ->with('success', 'Game berhasil ditambahkan!');
     }
 
-
     /**
-     * Display the specified resource.
+- Display the specified resource.
      */
     public function show(string $id)
     {
@@ -143,13 +193,13 @@ class GameController extends Controller
 
         // Menyimpan game ke Personal Library
         UserGame::create([
-            'user_id' => $user->id,
-            'game_id' => $game->id,
+            'user_id'     => $user->id,
+            'game_id'     => $game->id,
             'platform_id' => null,
-            'status' => 'Backlog',
-            'playtime' => 0,
-            'priority' => null,
-            'added_at' => now()->toDateString(),
+            'status'      => 'Backlog',
+            'playtime'    => 0,
+            'priority'    => null,
+            'added_at'    => now()->toDateString(),
         ]);
 
         return back()->with('success', 'Game berhasil ditambahkan ke Personal Library!');
@@ -157,8 +207,10 @@ class GameController extends Controller
 
     public function myLibrary(Request $request)
     {
+        $user = $request->user();
+
         // Mengambil koleksi game milik user yang sedang login
-        $userGames = $request->user()
+        $userGames = $user
             ->userGames()
             ->with([
                 'game.genre',
@@ -168,8 +220,104 @@ class GameController extends Controller
             ->latest()
             ->paginate(12);
 
+        // Data untuk chart sisi user pada Personal Library
+        $allUserGames = $user
+            ->userGames()
+            ->with('game')
+            ->get();
+
+        $statusOrder = ['Plan to Play', 'Backlog', 'Playing', 'Completed', 'Dropped'];
+        $rawStatusCounts = $allUserGames->groupBy('status')->map->count();
+        $statusCounts = collect($statusOrder)->mapWithKeys(function ($status) use ($rawStatusCounts) {
+            return [$status => $rawStatusCounts->get($status, 0)];
+        });
+
+        $topPlayedGames = $allUserGames
+            ->sortByDesc('playtime')
+            ->take(5)
+            ->values();
+
+        $totalPlaytime = (int) $allUserGames->sum('playtime');
+
         // Mengirim data ke halaman Personal Library
-        return view('games.library', compact('userGames'));
+        return view('games.library', compact(
+            'userGames',
+            'statusCounts',
+            'topPlayedGames',
+            'totalPlaytime'
+        ));
+    }
+
+    public function dashboard(Request $request)
+    {
+        $user = $request->user();
+        $period = $request->query('period', 'day');
+
+        // Data distribusi katalog per genre (Admin Analytics)
+        $genreDistribution = Genre::withCount('games')
+            ->orderByDesc('games_count')
+            ->get();
+
+        // Filter periode untuk Top 5 Game Terpopuler di Library
+        $popularQuery = UserGame::query()
+            ->select('game_id', DB::raw('COUNT(*) as total_added'))
+            ->with('game.genre')
+            ->groupBy('game_id')
+            ->orderByDesc('total_added')
+            ->limit(5);
+
+        if ($period === 'day') {
+            $popularQuery->whereDate('created_at', now()->toDateString());
+        } elseif ($period === 'week') {
+            $popularQuery->where('created_at', '>=', now()->startOfWeek());
+        } elseif ($period === 'month') {
+            $popularQuery->where('created_at', '>=', now()->startOfMonth());
+        }
+
+        $topPopularGames = $popularQuery->get();
+
+        $periodLabels = [
+            'day'   => 'hari ini',
+            'week'  => 'minggu ini',
+            'month' => 'bulan ini',
+            'all'   => 'semua waktu',
+        ];
+        $periodText = $periodLabels[$period] ?? 'hari ini';
+
+        return view('dashboard', compact(
+            'user',
+            'period',
+            'periodText',
+            'genreDistribution',
+            'topPopularGames'
+        ));
+    }
+
+    public function adminActivityData()
+    {
+        $byUser = User::query()
+            ->withCount('userGames')
+            ->withSum('userGames', 'playtime')
+            ->orderByDesc('user_games_count')
+            ->get()
+            ->map(function ($u) {
+                return [
+                    'name'           => $u->name,
+                    'role'           => $u->role,
+                    'library_count'  => (int) $u->user_games_count,
+                    'total_playtime' => (int) ($u->user_games_sum_playtime ?? 0),
+                ];
+            });
+
+        $byStatus = UserGame::query()
+            ->select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return response()->json([
+            'by_user'   => $byUser,
+            'by_status' => $byStatus,
+        ]);
     }
 
     public function editLibrary(string $id, Request $request)
@@ -186,7 +334,6 @@ class GameController extends Controller
         return view('games.library-edit', compact('userGame', 'platforms'));
     }
 
-
     public function updateLibrary(Request $request, string $id)
     {
         // Memastikan data yang diedit milik user yang sedang login
@@ -196,10 +343,10 @@ class GameController extends Controller
 
         // Memvalidasi input
         $validated = $request->validate([
-            'status' => 'required|in:Plan to Play,Backlog,Playing,Completed,Dropped',
+            'status'      => 'required|in:Plan to Play,Backlog,Playing,Completed,Dropped',
             'platform_id' => 'nullable|exists:platforms,id',
-            'playtime' => 'required|integer|min:0',
-            'priority' => 'nullable|in:Low,Medium,High',
+            'playtime'    => 'required|integer|min:0',
+            'priority'    => 'nullable|in:Low,Medium,High',
         ]);
 
         // Memperbarui data koleksi
@@ -225,7 +372,7 @@ class GameController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+- Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
@@ -238,9 +385,8 @@ class GameController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+- Update the specified resource in storage.
      */
-
     public function update(Request $request, string $id)
     {
         // Mencari game berdasarkan ID
@@ -248,15 +394,15 @@ class GameController extends Controller
 
         // Validasi data dari form edit
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'genre_id' => 'required|exists:genres,id',
-            'developer' => 'required|string|max:255',
-            'publisher' => 'required|string|max:255',
+            'title'        => 'required|string|max:255',
+            'genre_id'     => 'required|exists:genres,id',
+            'developer'    => 'required|string|max:255',
+            'publisher'    => 'required|string|max:255',
             'release_date' => 'required|date',
-            'platforms' => 'required|array|min:1',
-            'platforms.*' => 'exists:platforms,id',
-            'description' => 'nullable|string',
-            'cover_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'platforms'    => 'required|array|min:1',
+            'platforms.*'  => 'exists:platforms,id',
+            'description'  => 'nullable|string',
+            'cover_image'  => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         // Mengambil ID platform yang dipilih
@@ -290,11 +436,9 @@ class GameController extends Controller
             ->with('success', 'Game berhasil diperbarui!');
     }
 
-
     /**
-     * Remove the specified resource from storage.
+- Remove the specified resource from storage.
      */
-
     public function destroy(string $id)
     {
         // 1. Mengambil data game berdasarkan ID
@@ -319,7 +463,7 @@ class GameController extends Controller
             ->with('success', 'Game berhasil dihapus!');
     }
 
-public function exportExcel()
+    public function exportExcel()
     {
         return Excel::download(new GamesExport, 'katalog-game.xlsx');
     }
@@ -358,5 +502,4 @@ public function exportExcel()
         return redirect()->route('games.library')
             ->with('success', 'Koleksi Personal Library berhasil diimpor dari Excel!');
     }
-
 }

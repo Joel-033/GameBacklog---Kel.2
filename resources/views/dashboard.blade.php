@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -8,6 +7,7 @@
     <title>Dashboard - GameBacklog</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="wii-body dashboard-page" data-theme="classic">
@@ -132,6 +132,86 @@
             </div>
 
 
+            <!-- Admin Analytics (Admin Only) -->
+            @if (Auth::user()->role === 'admin')
+                <div class="dashboard-account" id="admin-analytics-section" style="margin-top: 24px;">
+
+                    <div class="dashboard-section-heading">
+                        <h3>Admin Analytics</h3>
+                        <span>CATALOG &amp; POPULARITY</span>
+                    </div>
+
+                    <!-- Card 1: Distribusi Game per Genre -->
+                    <div class="dashboard-info-item" style="display: block; padding: 20px; margin-bottom: 18px;">
+                        <h4 style="margin: 0 0 16px 0; font-size: 16px; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+                            <span>📊</span> Distribusi Game per Genre
+                        </h4>
+                        <div style="position: relative; height: 240px; width: 100%;">
+                            <canvas id="adminGenreChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Top 5 Game Terpopuler di Library -->
+                    <div class="dashboard-info-item" style="display: block; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                            <h4 style="margin: 0; font-size: 16px; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+                                <span>🔥</span> Top 5 Game Terpopuler di Library
+                            </h4>
+
+                            <form action="{{ route('dashboard') }}#admin-analytics-section" method="GET" style="margin: 0;">
+                                <select name="period"
+                                        onchange="this.form.submit()"
+                                        style="padding: 8px 16px; border-radius: 999px; border: 1px solid #38bdf8; background: rgba(15, 35, 50, 0.95); color: #e2f4ff; font-size: 13px; font-weight: 600; cursor: pointer; outline: none;">
+                                    <option value="day" {{ ($period ?? 'day') === 'day' ? 'selected' : '' }}>Per Day (Hari Ini)</option>
+                                    <option value="week" {{ ($period ?? '') === 'week' ? 'selected' : '' }}>Per Week (Minggu Ini)</option>
+                                    <option value="month" {{ ($period ?? '') === 'month' ? 'selected' : '' }}>Per Month (Bulan Ini)</option>
+                                    <option value="all" {{ ($period ?? '') === 'all' ? 'selected' : '' }}>All Time (Semua)</option>
+                                </select>
+                            </form>
+                        </div>
+
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid rgba(88, 207, 255, 0.2); color: #94a3b8; font-size: 11px; letter-spacing: 0.05em;">
+                                        <th style="padding: 10px 8px; width: 70px;">RANK</th>
+                                        <th style="padding: 10px 8px;">JUDUL GAME</th>
+                                        <th style="padding: 10px 8px;">GENRE</th>
+                                        <th style="padding: 10px 8px; text-align: right;">DITAMBAHKAN</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($topPopularGames ?? [] as $index => $pop)
+                                        <tr style="border-bottom: 1px solid rgba(88, 207, 255, 0.1);">
+                                            <td style="padding: 12px 8px; font-weight: 700; color: #38bdf8;">
+                                                #{{ $index + 1 }}
+                                            </td>
+                                            <td style="padding: 12px 8px; font-weight: 600;">
+                                                {{ optional($pop->game)->title ?? 'Game' }}
+                                            </td>
+                                            <td style="padding: 12px 8px; color: #94a3b8;">
+                                                {{ optional(optional($pop->game)->genre)->name ?? '-' }}
+                                            </td>
+                                            <td style="padding: 12px 8px; text-align: right; font-weight: 600;">
+                                                {{ $pop->total_added }}x
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" style="padding: 24px 8px; text-align: center; color: #94a3b8;">
+                                                Belum ada game yang ditambahkan ke library pada periode {{ $periodText ?? 'hari ini' }}.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            @endif
+
+
             <!-- Bottom Actions -->
             <div class="dashboard-bottom-actions">
 
@@ -177,7 +257,7 @@
     </main>
 
 
-    <!-- Theme Switcher -->
+    <!-- Theme Switcher & Admin Genre Chart -->
     <script>
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -229,6 +309,63 @@
                 applyTheme(newTheme);
 
             });
+
+            @if (Auth::user()->role === 'admin')
+                const genreCtx = document.getElementById('adminGenreChart');
+                if (genreCtx && typeof Chart !== 'undefined') {
+                    new Chart(genreCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: {!! json_encode(($genreDistribution ?? collect())->pluck('name')) !!},
+                            datasets: [{
+                                label: 'Games',
+                                data: {!! json_encode(($genreDistribution ?? collect())->pluck('games_count')) !!},
+                                backgroundColor: '#299fd6',
+                                borderRadius: 6,
+                                barThickness: 28
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1,
+                                        color: '#94a3b8',
+                                        font: { size: 11 }
+                                    },
+                                    grid: {
+                                        color: 'rgba(148, 163, 184, 0.14)'
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: '#cbd5e1',
+                                        font: { size: 11, weight: 'bold' }
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function (context) {
+                                            return ' ' + context.parsed.y + ' Games';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            @endif
 
         });
 

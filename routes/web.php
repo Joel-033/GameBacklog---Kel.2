@@ -42,10 +42,13 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
 
-    // Dashboard
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Dashboard (User & Admin Analytics)
+    Route::get('/dashboard', [GameController::class, 'dashboard'])
+        ->name('dashboard');
+
+    Route::get('/dashboard/activity-data', [GameController::class, 'adminActivityData'])
+        ->middleware('admin')
+        ->name('dashboard.activity-data');
 
 
     // Logout
