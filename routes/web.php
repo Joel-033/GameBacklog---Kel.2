@@ -61,9 +61,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/games', [GameController::class, 'index'])
         ->name('games.index');
 
-    // Export katalog game ke Excel
-    Route::get('/games/export', [GameController::class, 'exportExcel'])
-        ->name('games.export');
 
     // =====================================
     // KELOLA KATALOG: ADMIN SAJA

@@ -214,12 +214,6 @@
                class="wii-menu-button library-button">
                 🎮 My Library
             </a>
-            
-            {{-- Export Excel --}}
-            <a href="{{ route('games.export') }}"
-               class="wii-menu-button export-button">
-                📥 Export Excel
-            </a>
 
             {{-- Profile --}}
             <a href="{{ url('/dashboard') }}"
