@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -8,6 +7,7 @@
     <title>My Library - GameBacklog</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="wii-body" data-theme="classic">
@@ -44,7 +44,38 @@
             <span>Total Games</span>
             <strong>{{ $userGames->total() }}</strong>
         </div>
+
+        <div class="library-summary-card">
+            <span>Total Playtime</span>
+            <strong>{{ $totalPlaytime ?? 0 }} Hours</strong>
+        </div>
     </div>
+
+    <!-- Library Statistics (Sisi User) -->
+    <section class="library-content" style="margin-bottom: 20px;">
+        <div class="library-section-heading">
+            <div>
+                <h2>Library Statistics</h2>
+                <span>Playtime & Status Overview</span>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; padding: 14px 0;">
+            <div class="library-summary-card" style="display: block; text-align: left; padding: 16px;">
+                <h3 style="margin-bottom: 10px; font-size: 14px; color: #58cfff;">Top 5 Most Played Games (Hours)</h3>
+                <div style="position: relative; height: 200px; width: 100%;">
+                    <canvas id="userTopPlaytimeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="library-summary-card" style="display: block; text-align: left; padding: 16px;">
+                <h3 style="margin-bottom: 10px; font-size: 14px; color: #58cfff;">Game Status Distribution</h3>
+                <div style="position: relative; height: 200px; width: 100%;">
+                    <canvas id="userStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Daftar game -->
     <section class="library-content">
@@ -266,7 +297,7 @@
     </div>
 </div>
 
-<!-- Theme Toggle -->
+<!-- Theme Toggle & User Charts -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -300,6 +331,76 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
     });
+
+    const playtimeCtx = document.getElementById('userTopPlaytimeChart');
+    if (playtimeCtx && typeof Chart !== 'undefined') {
+        new Chart(playtimeCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode(($topPlayedGames ?? collect())->map(fn($item) => optional($item->game)->title ?? 'Game')) !!},
+                datasets: [{
+                    label: 'Playtime (Hours)',
+                    data: {!! json_encode(($topPlayedGames ?? collect())->pluck('playtime')) !!},
+                    backgroundColor: '#29b6f6',
+                    borderRadius: 6,
+                    barThickness: 16
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#cfe9f7',
+                            font: { size: 11 },
+                            callback: (val) => val + 'h'
+                        },
+                        grid: { color: 'rgba(255,255,255,0.06)' }
+                    },
+                    y: {
+                        ticks: { color: '#e2f4ff', font: { size: 11, weight: 'bold' } },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    }
+
+    const statusCtx = document.getElementById('userStatusChart');
+    if (statusCtx && typeof Chart !== 'undefined') {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {!! json_encode(($statusCounts ?? collect())->keys()) !!},
+                datasets: [{
+                    data: {!! json_encode(($statusCounts ?? collect())->values()) !!},
+                    backgroundColor: ['#58cfff', '#78909c', '#ffd166', '#2ecc71', '#ff7070'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#e2f4ff',
+                            boxWidth: 12,
+                            font: { size: 11 }
+                        }
+                    }
+                }
+            }
+        });
+    }
 
 });
 </script>

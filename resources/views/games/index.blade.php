@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -19,11 +18,22 @@
         }
 
         .wii-search-form {
+            position: relative;
             display: flex;
             align-items: center;
             gap: 10px;
             width: 100%;
-            max-width: 650px;
+            max-width: 720px;
+        }
+
+        .wii-search-input-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .wii-search-input-wrap .wii-search-input {
+            width: 100%;
         }
 
         .wii-search-input {
@@ -69,6 +79,155 @@
             color: #102330;
         }
 
+        /* LIVE SEARCH DROPDOWN */
+        .wii-live-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: rgba(16, 36, 52, 0.98);
+            border: 1px solid rgba(88, 207, 255, 0.55);
+            border-radius: 16px;
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+            z-index: 60;
+            overflow: hidden;
+            display: none;
+        }
+
+        .wii-live-dropdown.active {
+            display: block;
+        }
+
+        .wii-live-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            text-decoration: none;
+            color: #e6f6ff;
+            border-bottom: 1px solid rgba(88, 207, 255, 0.14);
+            transition: background 0.15s ease;
+        }
+
+        .wii-live-item:last-child {
+            border-bottom: none;
+        }
+
+        .wii-live-item:hover {
+            background: rgba(56, 165, 215, 0.22);
+        }
+
+        .wii-live-thumb {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            object-fit: cover;
+            background: rgba(30, 70, 95, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .wii-live-meta {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .wii-live-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .wii-live-sub {
+            font-size: 12px;
+            color: #7cc8ea;
+        }
+
+        /* FILTERS & SORT MODAL */
+        .wii-filter-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 15, 24, 0.72);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 120;
+            padding: 16px;
+        }
+
+        .wii-filter-modal-backdrop.active {
+            display: flex;
+        }
+
+        .wii-filter-modal {
+            width: 100%;
+            max-width: 560px;
+            background: #0f293d;
+            border: 1px solid rgba(88, 207, 255, 0.45);
+            border-radius: 18px;
+            padding: 22px;
+            color: #e9f7ff;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .wii-filter-modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .wii-filter-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: #79c8eb;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .wii-chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .wii-chip {
+            padding: 6px 13px;
+            border-radius: 999px;
+            border: 1px solid rgba(88, 207, 255, 0.35);
+            background: rgba(20, 52, 74, 0.85);
+            color: #cdeaff;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .wii-chip.active {
+            background: #28a9e0;
+            border-color: #65dfff;
+            color: #071924;
+            font-weight: 700;
+        }
+
+        .wii-filter-modal-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
         .wii-search-result {
             text-align: center;
             color: #a8d8ef;
@@ -94,7 +253,7 @@
                 flex-wrap: wrap;
             }
 
-            .wii-search-input {
+            .wii-search-input-wrap {
                 flex-basis: 100%;
             }
 
@@ -265,28 +424,43 @@
     </div>
 
 
-    {{-- SEARCH GAME --}}
+    {{-- SEARCH, FILTER & SORT GAME --}}
     <div class="wii-search-wrapper">
 
         <form action="{{ route('games.index') }}"
               method="GET"
+              id="wii-filter-form"
               class="wii-search-form">
 
-            <input
-                type="search"
-                name="search"
-                class="wii-search-input"
-                placeholder="🔍 Search your favorite games..."
-                value="{{ request('search') }}"
-                autocomplete="off"
-            >
+            <input type="hidden" name="genre_id" id="wii-genre-input" value="{{ request('genre_id') }}">
+            <input type="hidden" name="platform_id" id="wii-platform-input" value="{{ request('platform_id') }}">
+            <input type="hidden" name="sort" id="wii-sort-input" value="{{ request('sort', 'title_asc') }}">
+
+            <div class="wii-search-input-wrap">
+                <input
+                    type="search"
+                    name="search"
+                    id="wii-live-search"
+                    class="wii-search-input"
+                    placeholder="🔍 Search your favorite games..."
+                    value="{{ request('search') }}"
+                    autocomplete="off"
+                >
+                <div class="wii-live-dropdown" id="wii-live-dropdown"></div>
+            </div>
 
             <button type="submit"
                     class="wii-search-button">
                 🔍 Search
             </button>
 
-            @if (request('search'))
+            <button type="button"
+                    class="wii-search-button"
+                    id="wii-open-filter-modal">
+                ☰ Filter
+            </button>
+
+            @if (request()->anyFilled(['search', 'genre_id', 'platform_id', 'sort']))
                 <a href="{{ route('games.index') }}"
                    class="wii-search-clear">
                     ✕ Clear
@@ -295,6 +469,58 @@
 
         </form>
 
+    </div>
+
+
+    {{-- MODAL FILTERS & SORT --}}
+    <div class="wii-filter-modal-backdrop" id="wii-filter-modal">
+        <div class="wii-filter-modal">
+            <div class="wii-filter-modal-head">
+                <h3 style="margin: 0; font-size: 17px;">Filters & Sort</h3>
+                <button type="button" id="wii-close-filter-modal"
+                        style="background: none; border: none; color: #9ad4ee; font-size: 20px; cursor: pointer;">✕</button>
+            </div>
+
+            <span class="wii-filter-label">SORT BY</span>
+            <div class="wii-chip-group" id="wii-sort-chips">
+                <button type="button" class="wii-chip {{ request('sort', 'title_asc') === 'title_asc' ? 'active' : '' }}" data-sort="title_asc">A–Z</button>
+                <button type="button" class="wii-chip {{ request('sort') === 'newest' ? 'active' : '' }}" data-sort="newest">Newest Release</button>
+                <button type="button" class="wii-chip {{ request('sort') === 'latest_id' ? 'active' : '' }}" data-sort="latest_id">Latest Added</button>
+                <button type="button" class="wii-chip {{ request('sort') === 'title_desc' ? 'active' : '' }}" data-sort="title_desc">Z–A</button>
+            </div>
+
+            <span class="wii-filter-label">GENRES</span>
+            <input type="text" id="wii-genre-search" class="wii-search-input"
+                   placeholder="Search genres..." style="width: 100%; padding: 9px 14px; font-size: 13px; margin-bottom: 10px;">
+            <div class="wii-chip-group" id="wii-genre-chips">
+                <button type="button" class="wii-chip {{ request('genre_id') ? '' : 'active' }}" data-genre="">All Genres</button>
+                @foreach ($genres ?? [] as $genre)
+                    <button type="button"
+                            class="wii-chip {{ (string) request('genre_id') === (string) $genre->id ? 'active' : '' }}"
+                            data-genre="{{ $genre->id }}"
+                            data-genre-name="{{ strtolower($genre->name) }}">
+                        {{ $genre->name }}
+                    </button>
+                @endforeach
+            </div>
+
+            <span class="wii-filter-label">PLATFORMS</span>
+            <div class="wii-chip-group" id="wii-platform-chips">
+                <button type="button" class="wii-chip {{ request('platform_id') ? '' : 'active' }}" data-platform="">All Platforms</button>
+                @foreach ($platforms ?? [] as $platform)
+                    <button type="button"
+                            class="wii-chip {{ (string) request('platform_id') === (string) $platform->id ? 'active' : '' }}"
+                            data-platform="{{ $platform->id }}">
+                        {{ $platform->name }}
+                    </button>
+                @endforeach
+            </div>
+
+            <div class="wii-filter-modal-foot">
+                <button type="button" class="wii-search-clear" id="wii-reset-filters">Reset All</button>
+                <button type="button" class="wii-search-button" id="wii-apply-filters">Apply Filters</button>
+            </div>
+        </div>
     </div>
 
 
@@ -538,6 +764,162 @@
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
+
+    // =================================
+    // 0. LIVE SEARCH DROPDOWN & FILTER MODAL
+    // =================================
+
+    const liveSearchInput =
+        document.getElementById('wii-live-search');
+
+    const liveDropdown =
+        document.getElementById('wii-live-dropdown');
+
+    const filterForm =
+        document.getElementById('wii-filter-form');
+
+    let searchDebounce = null;
+
+    if (liveSearchInput && liveDropdown) {
+
+        liveSearchInput.addEventListener('input', function () {
+
+            const q = this.value.trim();
+            clearTimeout(searchDebounce);
+
+            if (q.length < 1) {
+                liveDropdown.classList.remove('active');
+                liveDropdown.innerHTML = '';
+                return;
+            }
+
+            searchDebounce = setTimeout(async function () {
+
+                try {
+                    const res = await fetch(`{{ route('games.index') }}?ajax=1&search=${encodeURIComponent(q)}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const data = await res.json();
+                    const list = data.games || [];
+
+                    if (!list.length) {
+                        liveDropdown.innerHTML = `<div class="wii-live-item"><div class="wii-live-meta"><span class="wii-live-sub">Game tidak ditemukan</span></div></div>`;
+                        liveDropdown.classList.add('active');
+                        return;
+                    }
+
+                    liveDropdown.innerHTML = list.map(item => `
+                        <a href="${item.show_url}" class="wii-live-item">
+                            ${item.cover_url
+                                ? `<img src="${item.cover_url}" alt="${item.title}" class="wii-live-thumb">`
+                                : `<div class="wii-live-thumb">🎮</div>`
+                            }
+                            <div class="wii-live-meta">
+                                <span class="wii-live-title">${item.title}</span>
+                                <span class="wii-live-sub">${item.genre}${item.year ? ' · ' + item.year : ''}</span>
+                            </div>
+                        </a>
+                    `).join('');
+                    liveDropdown.classList.add('active');
+                } catch (e) {
+                    liveDropdown.classList.remove('active');
+                }
+
+            }, 220);
+
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.wii-search-input-wrap')) {
+                liveDropdown.classList.remove('active');
+            }
+        });
+
+    }
+
+    const filterModal = document.getElementById('wii-filter-modal');
+    const openFilterBtn = document.getElementById('wii-open-filter-modal');
+    const closeFilterBtn = document.getElementById('wii-close-filter-modal');
+    const applyFilterBtn = document.getElementById('wii-apply-filters');
+    const resetFilterBtn = document.getElementById('wii-reset-filters');
+    const genreSearchInput = document.getElementById('wii-genre-search');
+    const sortInput = document.getElementById('wii-sort-input');
+    const genreInput = document.getElementById('wii-genre-input');
+    const platformInput = document.getElementById('wii-platform-input');
+
+    if (openFilterBtn && filterModal) {
+        openFilterBtn.addEventListener('click', function () {
+            filterModal.classList.add('active');
+        });
+    }
+
+    if (closeFilterBtn && filterModal) {
+        closeFilterBtn.addEventListener('click', function () {
+            filterModal.classList.remove('active');
+        });
+    }
+
+    if (filterModal) {
+        filterModal.addEventListener('click', function (event) {
+            if (event.target === filterModal) {
+                filterModal.classList.remove('active');
+            }
+        });
+    }
+
+    document.querySelectorAll('#wii-sort-chips .wii-chip').forEach(chip => {
+        chip.addEventListener('click', function () {
+            document.querySelectorAll('#wii-sort-chips .wii-chip').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            if (sortInput) sortInput.value = this.dataset.sort;
+        });
+    });
+
+    document.querySelectorAll('#wii-genre-chips .wii-chip').forEach(chip => {
+        chip.addEventListener('click', function () {
+            document.querySelectorAll('#wii-genre-chips .wii-chip').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            if (genreInput) genreInput.value = this.dataset.genre;
+        });
+    });
+
+    document.querySelectorAll('#wii-platform-chips .wii-chip').forEach(chip => {
+        chip.addEventListener('click', function () {
+            document.querySelectorAll('#wii-platform-chips .wii-chip').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            if (platformInput) platformInput.value = this.dataset.platform;
+        });
+    });
+
+    if (genreSearchInput) {
+        genreSearchInput.addEventListener('input', function () {
+            const term = this.value.toLowerCase().trim();
+            document.querySelectorAll('#wii-genre-chips .wii-chip').forEach(chip => {
+                if (!chip.dataset.genreName) return;
+                chip.style.display = chip.dataset.genreName.includes(term) ? '' : 'none';
+            });
+        });
+    }
+
+    if (applyFilterBtn && filterForm) {
+        applyFilterBtn.addEventListener('click', function () {
+            filterForm.submit();
+        });
+    }
+
+    if (resetFilterBtn) {
+        resetFilterBtn.addEventListener('click', function () {
+            if (sortInput) sortInput.value = 'title_asc';
+            if (genreInput) genreInput.value = '';
+            if (platformInput) platformInput.value = '';
+            if (liveSearchInput) liveSearchInput.value = '';
+            window.location.href = `{{ route('games.index') }}`;
+        });
+    }
+
 
     // =================================
     // 1. WII THEME SWITCHER
@@ -818,6 +1200,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (event.key === 'Escape') {
 
             overlay.classList.remove('active');
+
+            if (filterModal) {
+                filterModal.classList.remove('active');
+            }
 
             selectedGame = null;
 
