@@ -360,16 +360,6 @@
                     + Add Game
                 </a>
 
-                <a href="{{ route('games.export') }}"
-                   class="wii-menu-button export-button">
-                    📥 Export Excel
-                </a>
-
-                <button type="button"
-                        class="wii-menu-button import-button"
-                        onclick="document.getElementById('wii-import-modal').classList.add('active')">
-                    📤 Import Excel
-                </button>
             @endif
 
             {{-- Refresh --}}
@@ -379,11 +369,13 @@
                 ↻ Refresh
             </button>
 
-            {{-- Personal Library --}}
-            <a href="{{ route('games.library') }}"
-               class="wii-menu-button library-button">
-                🎮 My Library
-            </a>
+            {{-- Personal Library: User Only --}}
+            @if (auth()->user()->role !== 'admin')
+                <a href="{{ route('games.library') }}"
+                   class="wii-menu-button library-button">
+                    🎮 My Library
+                </a>
+            @endif
 
             {{-- Profile --}}
             <a href="{{ url('/dashboard') }}"
@@ -751,9 +743,53 @@
 
     <div class="dock-right">
 
-        <div class="mail-circle">
-            ✉
-        </div>
+        @if (auth()->user()->role === 'admin')
+
+            {{-- TOOLS ADMIN --}}
+            <div class="dock-tools">
+
+                <button type="button"
+                        class="tools-circle"
+                        id="wii-tools-toggle"
+                        aria-expanded="false"
+                        aria-label="Open admin tools"
+                        title="Tools">
+                    ⚙
+                </button>
+
+                <div class="tools-popup" id="wii-tools-popup">
+                    <div class="tools-popup-title">GAMEBACKLOG TOOLS</div>
+
+                    <a href="{{ route('games.export') }}" class="tools-option">
+                        <span>📥</span>
+                        <span>Export Excel</span>
+                    </a>
+
+                    <a href="{{ route('games.export.pdf') }}" class="tools-option">
+                        <span>📄</span>
+                        <span>Export PDF Catalog</span>
+                    </a>
+
+                    <button type="button" class="tools-option" id="wii-open-import">
+                        <span>📤</span>
+                        <span>Import Excel</span>
+                    </button>
+                </div>
+
+            </div>
+
+        @else
+
+            {{-- MAIL PLACEHOLDER USER --}}
+            <button type="button"
+                    class="tools-circle user-mail-placeholder"
+                    title="Mail - Coming Soon"
+                    aria-label="Mail coming soon"
+                    disabled>
+                ✉
+            </button>
+
+        @endif
 
     </div>
 
@@ -764,6 +800,39 @@
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
+
+    // =================================
+    // WII DOCK TOOLS MENU (ADMIN ONLY)
+    // =================================
+
+    const toolsToggle = document.getElementById('wii-tools-toggle');
+    const toolsPopup = document.getElementById('wii-tools-popup');
+    const openImport = document.getElementById('wii-open-import');
+    const importModal = document.getElementById('wii-import-modal');
+
+    if (toolsToggle && toolsPopup) {
+        toolsToggle.addEventListener('click', function (event) {
+            event.stopPropagation();
+
+            const isOpen = toolsPopup.classList.toggle('active');
+            toolsToggle.setAttribute('aria-expanded', String(isOpen));
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.dock-tools')) {
+                toolsPopup.classList.remove('active');
+                toolsToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    if (openImport && importModal) {
+        openImport.addEventListener('click', function () {
+            toolsPopup?.classList.remove('active');
+            toolsToggle?.setAttribute('aria-expanded', 'false');
+            importModal.classList.add('active');
+        });
+    }
 
     // =================================
     // 0. LIVE SEARCH DROPDOWN & FILTER MODAL

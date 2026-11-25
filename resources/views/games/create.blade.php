@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -7,6 +8,12 @@
     <title>Tambah Game - GameBacklog</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Quill WYSIWYG Editor -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css"
+        rel="stylesheet"
+    >
 </head>
 
 <body class="wii-body" data-theme="classic">
@@ -134,11 +141,17 @@
                 <h3>Additional Information</h3>
 
                 <div class="wii-field">
-                    <label for="description">Deskripsi</label>
-                    <textarea id="description"
-                              name="description"
-                              rows="4"
-                              placeholder="Ceritakan sedikit tentang game ini...">{{ old('description') }}</textarea>
+                    <label for="description">Description</label>
+
+                    <!-- Quill Editor -->
+                    <div id="description-editor" class="wii-quill-editor"></div>
+
+                    <!-- Hidden textarea untuk mengirim data ke Laravel -->
+                    <textarea
+                        id="description"
+                        name="description"
+                        hidden
+                    >{{ old('description') }}</textarea>
                 </div>
 
                 <div class="wii-field">
@@ -171,8 +184,51 @@
 
 </div>
 
+<!-- Quill JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+
+<!-- Inisialisasi WYSIWYG Editor -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    const descriptionInput = document.getElementById('description');
+    const form = document.querySelector('.wii-game-form');
+
+    const quill = new Quill('#description-editor', {
+        theme: 'snow',
+
+        placeholder: 'Ceritakan sedikit tentang game ini...',
+
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                [{ align: [] }],
+                ['link', 'clean']
+            ]
+        }
+    });
+
+    // Mengambil deskripsi lama jika validasi sebelumnya gagal
+    const initialContent = @json(old('description', ''));
+
+    if (initialContent) {
+        quill.clipboard.dangerouslyPasteHTML(initialContent);
+    }
+
+    // Memasukkan hasil editor ke textarea sebelum form dikirim
+    form.addEventListener('submit', function () {
+        descriptionInput.value = quill.root.innerHTML;
+    });
+
+});
+</script>
+
+<!-- Theme Toggle -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
     const themeToggle = document.getElementById('wii-theme-toggle');
 
     if (!themeToggle) return;
@@ -197,13 +253,17 @@ document.addEventListener('DOMContentLoaded', function () {
     applyTheme(savedTheme);
 
     themeToggle.addEventListener('click', function () {
+
         const currentTheme = document.body.dataset.theme;
+
         const newTheme = currentTheme === 'classic'
             ? 'midnight'
             : 'classic';
 
         applyTheme(newTheme);
+
     });
+
 });
 </script>
 

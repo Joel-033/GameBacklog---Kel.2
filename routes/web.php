@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\RawgController;
+use App\Http\Controllers\PdfController;
 
 
 // =========================================
@@ -106,6 +107,10 @@ Route::middleware('auth')->group(function () {
             ->whereNumber('id')
             ->name('games.destroy');
 
+        // Export Game Catalog ke PDF (Admin Only)
+        Route::get('/games/export/pdf', [PdfController::class, 'exportCatalog'])
+      ->name('games.export.pdf');
+
     });
 
 
@@ -150,6 +155,10 @@ Route::middleware('auth')->group(function () {
     // Export & Import Personal Library (User & Admin)
     Route::get('/my-library/export', [GameController::class, 'exportLibrary'])
         ->name('games.library.export');
+
+    // Export Personal Library ke PDF (User & Admin)
+    Route::get('/my-library/export/pdf', [PdfController::class, 'exportLibrary'])
+    ->name('games.library.export.pdf');
 
     Route::post('/my-library/import', [GameController::class, 'importLibrary'])
         ->name('games.library.import');

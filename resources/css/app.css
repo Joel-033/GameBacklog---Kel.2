@@ -4205,3 +4205,194 @@ body.wii-body[data-theme="midnight"] .page-arrow {
     border-radius: 12px;
     margin-bottom: 16px;
 }
+
+/* ==========================================
+   WII DOCK TOOLS MENU
+   Admin shortcuts: Import & Export Excel
+========================================== */
+
+.dock-right {
+    gap: 14px;
+}
+
+.dock-tools {
+    position: relative;
+    z-index: 30;
+}
+
+.tools-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 54px;
+    height: 54px;
+    border: 2px solid #81d2ef;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #fff, #e1f5fc);
+    color: #269fca;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 2px 7px rgba(0,0,0,.12);
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.tools-circle:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(60,185,230,.35);
+}
+
+.tools-circle:focus-visible,
+.tools-option:focus-visible {
+    outline: 2px solid #36b8e8;
+    outline-offset: 3px;
+}
+
+.tools-popup {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 14px);
+    z-index: 50;
+    width: 230px;
+    padding: 12px;
+    background: linear-gradient(145deg, #fff, #eaf8fd);
+    border: 1px solid #9cdef3;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,.2);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
+}
+
+.tools-popup.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.tools-popup-title {
+    padding: 8px 10px 12px;
+    color: #269fca;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    border-bottom: 1px solid #cceaf5;
+    margin-bottom: 8px;
+}
+
+.tools-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #287d9c;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+}
+
+.tools-option:hover {
+    background: #d8f2fc;
+    color: #087eae;
+}
+
+/* Midnight theme */
+body.wii-body[data-theme="midnight"] .tools-popup {
+    background: linear-gradient(145deg, #263d4d, #172b39);
+    border-color: #45677b;
+}
+
+body.wii-body[data-theme="midnight"] .tools-popup-title {
+    color: #55d4ff;
+    border-color: #405768;
+}
+
+body.wii-body[data-theme="midnight"] .tools-option {
+    color: #c7eafa;
+}
+
+body.wii-body[data-theme="midnight"] .tools-option:hover {
+    background: #304e61;
+    color: #fff;
+}
+
+body.wii-body[data-theme="midnight"] .tools-circle {
+    background: linear-gradient(145deg, #304b5d, #1b3040);
+    border-color: #55d4ff;
+    color: #55d4ff;
+}
+
+@media (max-width: 600px) {
+    .tools-circle {
+        width: 42px;
+        height: 42px;
+    }
+
+    .tools-popup {
+        width: 205px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tools-circle,
+    .tools-popup,
+    .tools-option {
+        transition: none;
+    }
+}
+
+/* USER MAIL PLACEHOLDER */
+.user-mail-placeholder {
+    cursor: not-allowed;
+    opacity: 0.85;
+}
+
+/* WYSIWYG Description Formatting */
+
+.game-description-content {
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+.game-description-content ol {
+    list-style-type: decimal !important;
+    padding-left: 25px !important;
+    margin: 10px 0 15px;
+}
+
+.game-description-content ul {
+    list-style-type: disc !important;
+    padding-left: 25px !important;
+    margin: 10px 0 15px;
+}
+
+.game-description-content li {
+    display: list-item !important;
+    margin-bottom: 4px;
+}
+
+.game-description-content p {
+    margin-bottom: 12px;
+}
+
+.game-description-content strong {
+    font-weight: bold;
+}
+
+.game-description-content em {
+    font-style: italic;
+}
+
+.game-description-content u {
+    text-decoration: underline;
+}

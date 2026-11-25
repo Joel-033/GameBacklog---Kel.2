@@ -8,6 +8,12 @@
     <title>Edit Game - GameBacklog</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Quill WYSIWYG Editor -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css"
+        rel="stylesheet"
+    >
 </head>
 
 <body class="wii-body" data-theme="classic">
@@ -211,10 +217,15 @@
 
                     <label for="description">Deskripsi</label>
 
-                    <textarea id="description"
-                              name="description"
-                              rows="4"
-                              placeholder="Ceritakan sedikit tentang game ini...">{{ old('description', $game->description) }}</textarea>
+                    <!-- Quill Editor -->
+                    <div id="description-editor" class="wii-quill-editor"></div>
+
+                    <!-- Hidden textarea untuk mengirim data ke Laravel -->
+                    <textarea
+                        id="description"
+                        name="description"
+                        hidden
+                    >{{ old('description', $game->description) }}</textarea>
 
                 </div>
 
@@ -287,6 +298,49 @@
 
 </div>
 
+
+<!-- Quill JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+
+
+<!-- WYSIWYG EDITOR -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const descriptionInput = document.getElementById('description');
+    const form = document.querySelector('.wii-game-form');
+
+    const quill = new Quill('#description-editor', {
+        theme: 'snow',
+
+        placeholder: 'Ceritakan sedikit tentang game ini...',
+
+        modules: {
+            toolbar: [
+                [{ header: [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                [{ align: [] }],
+                ['link', 'clean']
+            ]
+        }
+    });
+
+    // Mengambil deskripsi lama dari input atau database
+    const initialContent = @json(old('description', $game->description ?? ''));
+
+    // Menampilkan deskripsi lama di dalam Quill Editor
+    if (initialContent) {
+        quill.clipboard.dangerouslyPasteHTML(initialContent);
+    }
+
+    // Memasukkan hasil editor ke textarea sebelum form dikirim
+    form.addEventListener('submit', function () {
+        descriptionInput.value = quill.root.innerHTML;
+    });
+
+});
+</script>
 
 
 <!-- THEME SWITCHER -->

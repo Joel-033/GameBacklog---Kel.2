@@ -19,6 +19,152 @@ use Illuminate\Support\Facades\Storage;
 
 class GameController extends Controller
 {
+
+    /**
+     * Membersihkan HTML deskripsi game.
+     * Hanya mempertahankan format yang diizinkan.
+     */
+    private function sanitizeDescription(?string $description): ?string
+    {
+        if ($description === null || trim($description) === '') {
+            return null;
+        }
+
+        $allowedTags = [
+            'p', 'br',
+            'strong', 'b',
+            'em', 'i',
+            'u', 's',
+            'h1', 'h2', 'h3',
+            'ul', 'ol', 'li',
+            'blockquote',
+            'a',
+        ];
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $previousSetting = libxml_use_internal_errors(true);
+
+        $dom->loadHTML(
+            '<?xml encoding="UTF-8"><div>' . $description . '</div>',
+            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+        );
+
+        libxml_clear_errors();
+        libxml_use_internal_errors($previousSetting);
+
+        $container = $dom->getElementsByTagName('div')->item(0);
+
+        if (!$container) {
+            return null;
+        }
+
+        // Mengubah struktur daftar Quill menjadi HTML standar.
+        $normalizeLists = function ($node) use (&$normalizeLists, $dom) {
+            foreach (iterator_to_array($node->childNodes) as $child) {
+                if (!$child instanceof \DOMElement) {
+                    continue;
+                }
+
+                $normalizeLists($child);
+
+                if (strtolower($child->tagName) !== 'ol') {
+                    continue;
+                }
+
+                $groups = [];
+                $currentType = null;
+
+                foreach (iterator_to_array($child->childNodes) as $item) {
+                    if (!$item instanceof \DOMElement || strtolower($item->tagName) !== 'li') {
+                        continue;
+                    }
+
+                    $type = $item->getAttribute('data-list') === 'bullet' ? 'ul' : 'ol';
+
+                    if ($currentType !== $type) {
+                        $groups[] = [
+                            'type' => $type,
+                            'items' => [],
+                        ];
+                        $currentType = $type;
+                    }
+
+                    $groups[count($groups) - 1]['items'][] = $item;
+                }
+
+                if (empty($groups)) {
+                    continue;
+                }
+
+                $fragment = $dom->createDocumentFragment();
+
+                foreach ($groups as $group) {
+                    $list = $dom->createElement($group['type']);
+
+                    foreach ($group['items'] as $item) {
+                        $item->removeAttribute('data-list');
+                        $list->appendChild($item);
+                    }
+
+                    $fragment->appendChild($list);
+                }
+
+                $node->replaceChild($fragment, $child);
+            }
+        };
+
+        $normalizeLists($container);
+
+        // Membersihkan elemen dan atribut HTML.
+        $cleanNode = function ($node) use (&$cleanNode, $allowedTags) {
+            foreach (iterator_to_array($node->childNodes) as $child) {
+                if (!$child instanceof \DOMElement) {
+                    continue;
+                }
+
+                $tag = strtolower($child->tagName);
+
+                if (!in_array($tag, $allowedTags, true)) {
+                    $node->removeChild($child);
+                    continue;
+                }
+
+                // Simpan hanya URL link yang aman.
+                $safeHref = null;
+
+                if ($tag === 'a') {
+                    $href = trim($child->getAttribute('href'));
+
+                    if (preg_match('/^(https?:\/\/|mailto:)/i', $href)) {
+                        $safeHref = $href;
+                    }
+                }
+
+                // Hapus semua atribut yang tidak diperlukan.
+                while ($child->attributes->length > 0) {
+                    $child->removeAttributeNode($child->attributes->item(0));
+                }
+
+                // Kembalikan href setelah URL diperiksa.
+                if ($safeHref !== null) {
+                    $child->setAttribute('href', $safeHref);
+                }
+
+                $cleanNode($child);
+            }
+        };
+
+        $cleanNode($container);
+
+        // Menghasilkan HTML yang sudah dibersihkan.
+        $result = '';
+
+        foreach ($container->childNodes as $child) {
+            $result .= $dom->saveHTML($child);
+        }
+
+        return $result;
+    }
     /**
 - Display a listing of the resource.
      */
@@ -145,6 +291,10 @@ class GameController extends Controller
 
         // Menghapus platforms dari data utama
         unset($validated['platforms']);
+        // Membersihkan HTML pada deskripsi game
+        $validated['description'] = $this->sanitizeDescription(
+        $validated['description'] ?? null
+        );
 
         // Upload cover image jika tersedia
         if ($request->hasFile('cover_image')) {
@@ -410,6 +560,11 @@ class GameController extends Controller
 
         // Menghapus platforms dari data utama
         unset($validated['platforms']);
+
+        // Membersihkan HTML pada deskripsi game
+        $validated['description'] = $this->sanitizeDescription(
+            $validated['description'] ?? null
+        );
 
         // Menyimpan lokasi cover lama
         $oldCover = $game->cover_image;

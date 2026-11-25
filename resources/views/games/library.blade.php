@@ -100,7 +100,11 @@
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <a href="{{ route('games.library.export') }}" class="wii-back-button">
-                    📥 Export Library
+                    📥 Export Excel
+                </a>
+
+                <a href="{{ route('games.library.export.pdf') }}" class="wii-back-button">
+                    📄 Export PDF
                 </a>
 
                 <button type="button"

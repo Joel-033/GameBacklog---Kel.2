@@ -194,9 +194,20 @@
 
                 <h3>About This Game</h3>
 
-                <p>
-                    {{ $game->description ?: 'Belum ada deskripsi untuk game ini.' }}
-                </p>
+                <div class="game-description-content">
+
+                    @if ($game->description)
+
+                        {{-- Menampilkan HTML hasil WYSIWYG Editor --}}
+                        {!! $game->description !!}
+
+                    @else
+
+                        <p>Belum ada deskripsi untuk game ini.</p>
+
+                    @endif
+
+                </div>
 
             </div>
 
@@ -269,6 +280,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const themeToggle =
         document.getElementById('wii-theme-toggle');
+
+    if (!themeToggle) return;
 
     const savedTheme =
         localStorage.getItem('wii-theme') || 'classic';
