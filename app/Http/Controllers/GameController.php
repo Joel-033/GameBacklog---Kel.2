@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\UserGame;
 use App\Models\Game;
+use App\Exports\GamesExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Genre;
 use App\Models\Platform;
 use Illuminate\Http\Request;
@@ -289,6 +291,10 @@ class GameController extends Controller
         // 6. Kembali ke halaman daftar game
         return redirect()->route('games.index')
             ->with('success', 'Game berhasil dihapus!');
+    }
+    public function exportExcel()
+    {
+        return Excel::download(new GamesExport, 'katalog-game.xlsx');
     }
 
 }
