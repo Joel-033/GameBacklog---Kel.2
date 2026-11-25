@@ -135,8 +135,22 @@ class UserInsightController extends Controller
             ->pluck('games.rawg_id')
             ->toArray();
 
+        // Mapping nama genre lokal ke slug resmi milik RAWG API
+        $genreMap = [
+            'rpg' => 'role-playing-games-rpg',
+            'fps' => 'shooter',
+            'action' => 'action',
+            'adventure' => 'adventure',
+            'fighting' => 'fighting',
+            'racing' => 'racing',
+            'simulation' => 'simulation',
+            'strategy' => 'strategy',
+            'sports' => 'sports',
+            'puzzle' => 'puzzle',
+        ];
+
         $genreName = $topGenre ? $topGenre->name : 'Action';
-        $genreSlug = Str::slug($genreName);
+        $genreSlug = $genreMap[strtolower($genreName)] ?? Str::slug($genreName);
         $rawgApiKey = env('RAWG_API_KEY');
 
         // Jika RAWG_API_KEY tersedia di .env, ambil rekomendasi langsung dari RAWG API
@@ -161,20 +175,29 @@ class UserInsightController extends Controller
                         'cover_image' => $game['background_image'],
                     ]);
 
-                return response()->json([
-                    'status' => 'success',
-                    'source' => 'GameBacklog Insight Engine + RAWG API',
-                    'based_on_favorite_genre' => $genreName,
-                    'recommendations' => $recommended,
-                ], 200);
+                if ($recommended->isNotEmpty()) {
+                    return response()->json([
+                        'status' => 'success',
+                        'source' => 'GameBacklog Insight Engine + RAWG API',
+                        'based_on_favorite_genre' => $genreName,
+                        'recommendations' => $recommended,
+                    ], 200);
+                }
             }
         }
 
-        // Fallback: jika RAWG_API_KEY belum diisi di .env, ambil dari database lokal
+        // Fallback: ambil dari database lokal jika RAWG kosong atau key belum diisi
+        $ownedGameIds = UserGame::where('user_id', $userId)->pluck('game_id');
         $localFallback = Game::when($topGenre, fn ($q) => $q->where('genre_id', $topGenre->id))
-            ->whereNotIn('id', UserGame::where('user_id', $userId)->pluck('game_id'))
+            ->whereNotIn('id', $ownedGameIds)
             ->take(5)
             ->get(['id', 'rawg_id', 'title', 'developer', 'release_date', 'cover_image']);
+
+        if ($localFallback->isEmpty()) {
+            $localFallback = Game::whereNotIn('id', $ownedGameIds)
+                ->take(5)
+                ->get(['id', 'rawg_id', 'title', 'developer', 'release_date', 'cover_image']);
+        }
 
         return response()->json([
             'status' => 'success',
